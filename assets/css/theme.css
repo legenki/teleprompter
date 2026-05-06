@@ -62,9 +62,16 @@ header h1 {
   margin: 0;
 }
 
-header h1 .icon-bullhorn {
-  font-size: 18px;
+header h1 .logo-icon {
   color: var(--tp-ui-accent);
+  flex-shrink: 0;
+}
+
+header h1 .brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--tp-ui-text);
+  margin-right: 4px;
 }
 
 header h1 .clock {
@@ -151,13 +158,20 @@ header nav {
   font-size: 11px !important;
   font-weight: 600;
   color: var(--tp-ui-muted);
-  text-transform: uppercase;
-  letter-spacing: .04em;
+}
+
+.sliders label svg {
+  color: var(--tp-ui-muted);
+  flex-shrink: 0;
 }
 
 .sliders label span {
   font-variant-numeric: tabular-nums;
   color: var(--tp-ui-text);
+  min-width: 22px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
 }
 
 .sliders br {
@@ -203,7 +217,7 @@ header nav {
 .buttons .button {
   width: 36px !important;
   height: 36px !important;
-  font-size: 16px !important;
+  font-size: 0 !important;
   line-height: 1 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -219,9 +233,38 @@ header nav {
   cursor: pointer;
 }
 
-.buttons .button.small {
-  font-size: 14px !important;
+.buttons .button svg {
+  flex-shrink: 0;
 }
+
+.buttons .button.small {
+  font-size: 0 !important;
+}
+
+/* Hide the FontAwesome ::before pseudo-icons since we now use SVG */
+.buttons .button.icon-play::before,
+.buttons .button.icon-pause::before,
+.buttons .button.icon-tablet::before,
+.buttons .button.icon-eye-close::before,
+.buttons .button.icon-eye-open::before,
+.buttons .button.icon-undo::before,
+.buttons .button.icon-text-width::before,
+.buttons .button.icon-text-height::before {
+  display: none !important;
+  content: '' !important;
+}
+
+/* Dim button: toggle eye / eye-off SVG based on state */
+.btn-dim .dim-on { display: inline; }
+.btn-dim .dim-off { display: none; }
+.btn-dim.icon-eye-open .dim-on { display: none; }
+.btn-dim.icon-eye-open .dim-off { display: inline; }
+
+/* Play button: toggle play / pause SVG */
+.btn-play .play-icon { display: inline; }
+.btn-play .pause-icon { display: none; }
+.btn-play.icon-pause .play-icon { display: none; }
+.btn-play.icon-pause .pause-icon { display: inline; }
 
 .buttons .button:hover {
   background: var(--tp-ui-surface2) !important;
@@ -236,9 +279,9 @@ header nav {
 .buttons .button.play {
   width: 40px !important;
   height: 40px !important;
-  font-size: 18px !important;
   background: var(--tp-ui-accent) !important;
   color: #fff !important;
+  margin-left: 4px !important;
 }
 
 .buttons .button.play:hover {
