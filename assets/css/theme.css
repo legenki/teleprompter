@@ -518,6 +518,7 @@ header nav {
   margin: 0;
 }
 .drafts-empty.hidden { display: none; }
+.drafts-backdrop[hidden] { display: none !important; }
 .drafts-backdrop {
   position: fixed;
   inset: 0;
@@ -526,6 +527,7 @@ header nav {
 }
 
 /* === COUNTDOWN === */
+.countdown[hidden] { display: none !important; }
 .countdown {
   position: fixed;
   inset: 0;
@@ -542,8 +544,10 @@ header nav {
   font-weight: 700;
   color: #fff;
   font-variant-numeric: tabular-nums;
-  animation: cd-pulse 1s ease-in-out;
   text-shadow: 0 4px 32px rgba(0, 0, 0, .5);
+}
+.countdown:not([hidden]) .countdown-num {
+  animation: cd-pulse 1s ease-in-out;
 }
 @keyframes cd-pulse {
   0%   { transform: scale(.5); opacity: 0; }
@@ -553,6 +557,7 @@ header nav {
 }
 
 /* === READING MARKER === */
+.reading-marker[hidden] { display: none !important; }
 .reading-marker {
   position: fixed;
   left: 0;
