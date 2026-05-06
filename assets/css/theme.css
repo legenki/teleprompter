@@ -13,7 +13,7 @@
   --tp-ui-accent-soft: #fef3c7;
   --tp-ui-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .06);
   --tp-ui-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --tp-prompter-font: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
 [data-theme="dark"] {
@@ -66,12 +66,14 @@
   display: inline;
 }
 
-/* Apply Inter Tight to teleprompter article text */
+/* Apply Fraunces (from notagen) to teleprompter article text.
+   Only the typeface changes — text color and background remain
+   user-configurable via the color pickers. */
 article .teleprompter,
 article .teleprompter p {
   font-family: var(--tp-prompter-font);
-  font-feature-settings: "ss01", "cv11";
-  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
+  letter-spacing: 0;
 }
 
 /* === UI THEME OVERRIDES (header / controls / modal) === */
