@@ -140,6 +140,7 @@ var TelePrompter = (function() {
     initUI();
     initRemote();
     checkForUpdate();
+    syncPrompterToTheme();
 
     // Track that we've started TelePrompter
     initialized = true;
@@ -806,7 +807,19 @@ var TelePrompter = (function() {
   }
 
   /**
-   * Apply Theme (light or dark) and persist to localStorage
+   * On startup, align prompter colors with the active theme so it
+   * doesn't look mismatched (e.g. dark text on dark background) on
+   * first paint. Called once after initSettings/initUI.
+   */
+  function syncPrompterToTheme() {
+    var theme = document.documentElement.getAttribute('data-theme') || 'light';
+    setTheme(theme);
+  }
+
+  /**
+   * Apply Theme (light or dark) and persist to localStorage.
+   * Also updates the teleprompter article colors (text + background)
+   * to match the theme. The user may still override via color pickers.
    * @param {String} theme
    */
   function setTheme(theme) {
@@ -817,6 +830,47 @@ var TelePrompter = (function() {
     try {
       localStorage.setItem('teleprompter_theme', theme);
     } catch (e) {}
+
+    // Apply matching prompter colors for the theme
+    var prompterBg = theme === 'dark' ? '#141414' : '#ffffff';
+    var prompterText = theme === 'dark' ? '#ffffff' : '#1a1916';
+
+    config.backgroundColor = prompterBg;
+    config.textColor = prompterText;
+
+    // Sync color pickers
+    if ($elm.backgroundColor && $elm.backgroundColor.length) {
+      $elm.backgroundColor.val(prompterBg);
+    }
+    if ($elm.textColor && $elm.textColor.length) {
+      $elm.textColor.val(prompterText);
+    }
+
+    // Apply to DOM
+    if ($elm.article && $elm.article.length) {
+      $elm.article.css('background-color', prompterBg);
+    }
+    if ($elm.body && $elm.body.length) {
+      $elm.body.css('background-color', prompterBg);
+    }
+    if ($elm.teleprompter && $elm.teleprompter.length) {
+      $elm.teleprompter.css('background-color', prompterBg);
+      $elm.teleprompter.css('color', prompterText);
+    }
+
+    // Persist user preference
+    try {
+      localStorage.setItem('teleprompter_background_color', prompterBg);
+      localStorage.setItem('teleprompter_text_color', prompterText);
+    } catch (e) {}
+
+    // Sync to remote if connected
+    if (socket && remote) {
+      clearTimeout(emitTimeout);
+      emitTimeout = setTimeout(function() {
+        socket.emit('clientCommand', 'updateConfig', config);
+      }, timerExp);
+    }
   }
 
   /**

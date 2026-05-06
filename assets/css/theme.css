@@ -77,22 +77,17 @@ article .teleprompter p {
 }
 
 /* === UI THEME OVERRIDES (header / controls / modal) === */
-/* Apply Inter UI font to chrome, but DO NOT cascade text color to article
-   so the user-configured prompter text/background remain authoritative. */
+/* Apply Inter UI font to chrome. Body/article background and text colors
+   are synchronized in JS (see setTheme) so they update together with
+   the theme switch but remain user-overridable via the color pickers. */
 body {
   font-family: var(--tp-ui-font);
-  background-color: var(--tp-ui-bg);
 }
 
 header {
   background-color: var(--tp-ui-surface);
   border-bottom-color: var(--tp-ui-border) !important;
   color: var(--tp-ui-text);
-}
-
-/* Article keeps its own user-configurable colors — don't theme it */
-article {
-  color: #fff;
 }
 
 header h1 {
