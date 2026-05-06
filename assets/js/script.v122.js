@@ -831,9 +831,9 @@ var TelePrompter = (function() {
       localStorage.setItem('teleprompter_theme', theme);
     } catch (e) {}
 
-    // Apply matching prompter colors for the theme
-    var prompterBg = theme === 'dark' ? '#141414' : '#ffffff';
-    var prompterText = theme === 'dark' ? '#ffffff' : '#1a1916';
+    // Apply matching prompter colors for the theme (GitHub palette)
+    var prompterBg = theme === 'dark' ? '#0d1117' : '#ffffff';
+    var prompterText = theme === 'dark' ? '#f0f6fc' : '#1f2328';
 
     config.backgroundColor = prompterBg;
     config.textColor = prompterText;

@@ -1,32 +1,41 @@
-/* Theme tokens - inspired by ba-driving-exam */
-/* Note: TelePrompter article/text has its own user-configurable colors.
+/* Theme tokens - GitHub Primer-inspired palette
+   (https://primer.style/foundations/color)
+   Note: TelePrompter article/text has its own user-configurable colors.
    These tokens style the surrounding UI (header, controls, modal). */
 :root {
-  --tp-ui-bg: #f9f9f8;
+  /* GitHub Light */
+  --tp-ui-bg: #ffffff;
   --tp-ui-surface: #ffffff;
-  --tp-ui-surface2: #f3f3f0;
-  --tp-ui-surface3: #eeecea;
-  --tp-ui-border: #e5e4df;
-  --tp-ui-text: #1a1916;
-  --tp-ui-muted: #6b6963;
-  --tp-ui-accent: #d97706;
-  --tp-ui-accent-soft: #fef3c7;
-  --tp-ui-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .06);
-  --tp-ui-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tp-ui-surface2: #f6f8fa;
+  --tp-ui-surface3: #eaeef2;
+  --tp-ui-border: #d0d7de;
+  --tp-ui-text: #1f2328;
+  --tp-ui-muted: #59636e;
+  --tp-ui-accent: #0969da;          /* GitHub blue (links / accent) */
+  --tp-ui-accent-hover: #0550ae;
+  --tp-ui-accent-soft: #ddf4ff;
+  --tp-ui-success: #1a7f37;         /* GitHub green (PR merged) */
+  --tp-ui-danger: #cf222e;
+  --tp-ui-shadow: 0 1px 0 rgba(31,35,40,.04), 0 1px 3px rgba(31,35,40,.06);
+  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
   --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
 [data-theme="dark"] {
-  --tp-ui-bg: #121212;
-  --tp-ui-surface: #1e1e1e;
-  --tp-ui-surface2: #2a2a2a;
-  --tp-ui-surface3: #333333;
-  --tp-ui-border: #404040;
-  --tp-ui-text: #e8e8e8;
-  --tp-ui-muted: #a8a8a8;
-  --tp-ui-accent: #d97706;
-  --tp-ui-accent-soft: #704100;
-  --tp-ui-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 4px 12px rgba(0, 0, 0, .2);
+  /* GitHub Dark */
+  --tp-ui-bg: #0d1117;
+  --tp-ui-surface: #0d1117;
+  --tp-ui-surface2: #151b23;
+  --tp-ui-surface3: #212830;
+  --tp-ui-border: #3d444d;
+  --tp-ui-text: #f0f6fc;
+  --tp-ui-muted: #9198a1;
+  --tp-ui-accent: #4493f8;          /* GitHub dark mode blue */
+  --tp-ui-accent-hover: #58a6ff;
+  --tp-ui-accent-soft: rgba(56, 139, 253, .15);
+  --tp-ui-success: #3fb950;
+  --tp-ui-danger: #f85149;
+  --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
 }
 
 /* === MODERN TOPBAR === */
@@ -43,10 +52,10 @@ header {
 }
 
 [data-theme="dark"] header {
-  background: rgba(30, 30, 30, .92) !important;
+  background: var(--tp-ui-surface2) !important;
 }
 :root:not([data-theme="dark"]) header {
-  background: rgba(255, 255, 255, .92) !important;
+  background: var(--tp-ui-surface) !important;
 }
 
 header h1 {
