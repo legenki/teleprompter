@@ -141,6 +141,8 @@ var TelePrompter = (function() {
     initRemote();
     checkForUpdate();
     syncPrompterToTheme();
+    updateStats();
+    bindExtraFeatures();
 
     // Track that we've started TelePrompter
     initialized = true;
@@ -761,7 +763,13 @@ var TelePrompter = (function() {
    */
   function handlePlay() {
     if (!isPlaying) {
-      startTeleprompter();
+      var countdownEnabled = false;
+      try { countdownEnabled = localStorage.getItem('teleprompter_countdown') !== '0'; } catch (e) {}
+      if (countdownEnabled) {
+        runCountdown(startTeleprompter);
+      } else {
+        startTeleprompter();
+      }
     } else {
       stopTeleprompter();
     }
@@ -1384,7 +1392,7 @@ var TelePrompter = (function() {
       'margin-bottom': Math.ceil(config.fontSize * 0.25) + 'px'
     });
 
-    $('label.font_size_label > span').text('(' + config.fontSize + ')');
+    $('label.font_size_label > span').text(config.fontSize);
 
     if (save) {
       localStorage.setItem('teleprompter_font_size', config.fontSize);
@@ -1419,7 +1427,8 @@ var TelePrompter = (function() {
    */
   function updateSpeed(save, skipUpdate) {
     config.pageSpeed = $elm.speed.slider('value');
-    $('label.speed_label > span').text('(' + $elm.speed.slider('value') + ')');
+    $('label.speed_label > span').text($elm.speed.slider('value'));
+    updateStats();
 
     if (save) {
       localStorage.setItem('teleprompter_speed', $elm.speed.slider('value'));
@@ -1462,6 +1471,7 @@ var TelePrompter = (function() {
 
     localStorage.setItem('teleprompter_text', $elm.teleprompter.html());
     $('p:empty', $elm.teleprompter).remove();
+    updateStats();
 
     if (debug) {
       console.log('[TP]', 'TelePrompter Text Updated');
@@ -1471,6 +1481,29 @@ var TelePrompter = (function() {
     timerGA = setTimeout(function(){
       gaEvent('TP', 'TelePrompter Text Updated');
     }, timerExp);
+  }
+
+  /**
+   * Count words in current teleprompter text and estimate reading time.
+   * Reading time is derived from pageSpeed (rough approximation:
+   * speed 0..50 maps to ~80..220 words per minute).
+   */
+  function updateStats() {
+    var text = ($elm.teleprompter.text() || '').trim();
+    var words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+
+    // Map pageSpeed (0-50) to wpm (80-220)
+    var speed = parseInt(config.pageSpeed, 10) || 0;
+    var wpm = 80 + (speed / 50) * 140;
+    var seconds = words > 0 ? Math.round((words / wpm) * 60) : 0;
+    var mm = Math.floor(seconds / 60);
+    var ss = seconds % 60;
+    var formatted = '~' + mm + ':' + (ss < 10 ? '0' : '') + ss;
+
+    var $w = document.getElementById('word-count');
+    var $t = document.getElementById('reading-time');
+    if ($w) $w.textContent = words;
+    if ($t) $t.textContent = formatted;
   }
 
   /**
@@ -1506,6 +1539,232 @@ var TelePrompter = (function() {
     } catch (error) {
       console.warn('Failed to update URL:', error);
     }
+  }
+
+  /**
+   * ==================================================
+   * Extra UI Features: Drafts / Countdown / Marker / Fullscreen
+   * ==================================================
+   */
+
+  /* ---------- DRAFTS (saved scripts) ---------- */
+  var DRAFTS_KEY = 'teleprompter_drafts';
+  var ACTIVE_DRAFT_KEY = 'teleprompter_active_draft';
+
+  function loadDrafts() {
+    try {
+      var raw = localStorage.getItem(DRAFTS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+  function saveDrafts(drafts) {
+    try { localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts)); } catch (e) {}
+  }
+  function getActiveDraftId() {
+    try { return localStorage.getItem(ACTIVE_DRAFT_KEY); } catch (e) { return null; }
+  }
+  function setActiveDraftId(id) {
+    try {
+      if (id) localStorage.setItem(ACTIVE_DRAFT_KEY, id);
+      else localStorage.removeItem(ACTIVE_DRAFT_KEY);
+    } catch (e) {}
+  }
+  function renderDrafts() {
+    var drafts = loadDrafts();
+    var $list = document.getElementById('drafts-list');
+    var $empty = document.getElementById('drafts-empty');
+    if (!$list || !$empty) return;
+    $list.innerHTML = '';
+    if (!drafts.length) {
+      $empty.classList.remove('hidden');
+      return;
+    }
+    $empty.classList.add('hidden');
+    var activeId = getActiveDraftId();
+    drafts.forEach(function(d) {
+      var li = document.createElement('li');
+      if (d.id === activeId) li.classList.add('active');
+      li.dataset.id = d.id;
+      var preview = (d.text || '').replace(/<[^>]+>/g, ' ').trim().slice(0, 60);
+      var date = new Date(d.updated || d.created || Date.now()).toLocaleString();
+      li.innerHTML = '<div class="draft-info">' +
+        '<div class="draft-name"></div>' +
+        '<div class="draft-meta"></div>' +
+        '</div>' +
+        '<button class="draft-delete" aria-label="Delete">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>' +
+        '</button>';
+      li.querySelector('.draft-name').textContent = d.name || preview || 'Untitled';
+      li.querySelector('.draft-meta').textContent = date;
+      li.addEventListener('click', function(e) {
+        if (e.target.closest('.draft-delete')) return;
+        loadDraftIntoEditor(d.id);
+      });
+      li.querySelector('.draft-delete').addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteDraft(d.id);
+      });
+      $list.appendChild(li);
+    });
+  }
+  function saveCurrentAsDraft() {
+    var name = prompt('Name this script:', '');
+    if (name === null) return; // cancelled
+    var drafts = loadDrafts();
+    var id = 'd_' + Date.now();
+    drafts.unshift({
+      id: id,
+      name: (name || '').trim() || 'Untitled',
+      text: $elm.teleprompter.html(),
+      created: Date.now(),
+      updated: Date.now()
+    });
+    saveDrafts(drafts);
+    setActiveDraftId(id);
+    renderDrafts();
+  }
+  function loadDraftIntoEditor(id) {
+    var drafts = loadDrafts();
+    var d = drafts.find(function(x){ return x.id === id; });
+    if (!d) return;
+    $elm.teleprompter.html(d.text || '');
+    localStorage.setItem('teleprompter_text', d.text || '');
+    setActiveDraftId(id);
+    renderDrafts();
+    updateStats();
+    closeDraftsPanel();
+  }
+  function deleteDraft(id) {
+    if (!confirm('Delete this script?')) return;
+    var drafts = loadDrafts().filter(function(d){ return d.id !== id; });
+    saveDrafts(drafts);
+    if (getActiveDraftId() === id) setActiveDraftId(null);
+    renderDrafts();
+  }
+  function newDraft() {
+    if ($elm.teleprompter.text().trim() &&
+        !confirm('Discard current text and start a new script?')) return;
+    $elm.teleprompter.html('<p>Type your new script here...</p>');
+    localStorage.setItem('teleprompter_text', $elm.teleprompter.html());
+    setActiveDraftId(null);
+    renderDrafts();
+    updateStats();
+    closeDraftsPanel();
+    $elm.teleprompter.focus();
+  }
+  function openDraftsPanel() {
+    var $p = document.getElementById('drafts-panel');
+    var $b = document.getElementById('drafts-backdrop');
+    if ($p) { $p.classList.add('open'); $p.setAttribute('aria-hidden', 'false'); }
+    if ($b) $b.hidden = false;
+    renderDrafts();
+  }
+  function closeDraftsPanel() {
+    var $p = document.getElementById('drafts-panel');
+    var $b = document.getElementById('drafts-backdrop');
+    if ($p) { $p.classList.remove('open'); $p.setAttribute('aria-hidden', 'true'); }
+    if ($b) $b.hidden = true;
+  }
+
+  /* ---------- COUNTDOWN ---------- */
+  function runCountdown(onDone) {
+    var $cd = document.getElementById('countdown');
+    var $num = $cd && $cd.querySelector('.countdown-num');
+    if (!$cd || !$num) { onDone(); return; }
+    $cd.hidden = false;
+    var n = 3;
+    function tick() {
+      $num.textContent = n;
+      // Restart animation
+      $num.style.animation = 'none';
+      $num.offsetHeight; // reflow
+      $num.style.animation = '';
+      if (n === 0) {
+        setTimeout(function(){ $cd.hidden = true; onDone(); }, 800);
+      } else {
+        n--;
+        setTimeout(tick, 1000);
+      }
+    }
+    tick();
+  }
+
+  /* ---------- READING MARKER ---------- */
+  function toggleMarker() {
+    var $m = document.getElementById('reading-marker');
+    if (!$m) return;
+    var on = $m.hidden;
+    $m.hidden = !on;
+    try { localStorage.setItem('teleprompter_marker', on ? '1' : '0'); } catch (e) {}
+  }
+  function loadMarkerPref() {
+    try {
+      var v = localStorage.getItem('teleprompter_marker');
+      var $m = document.getElementById('reading-marker');
+      if ($m && v === '1') $m.hidden = false;
+    } catch (e) {}
+  }
+
+  /* ---------- FULLSCREEN ---------- */
+  var idleTimer;
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      (document.documentElement.requestFullscreen || function(){})
+        .call(document.documentElement);
+    } else {
+      (document.exitFullscreen || function(){}).call(document);
+    }
+  }
+  function onFullscreenChange() {
+    var on = !!document.fullscreenElement;
+    document.body.classList.toggle('fullscreen-mode', on);
+    var $enter = document.querySelector('#fullscreen-toggle .icon-fs-enter');
+    var $exit  = document.querySelector('#fullscreen-toggle .icon-fs-exit');
+    if ($enter) $enter.style.display = on ? 'none' : '';
+    if ($exit)  $exit.style.display  = on ? '' : 'none';
+    if (on) startIdleWatcher();
+    else stopIdleWatcher();
+  }
+  function startIdleWatcher() {
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('keydown', resetIdle);
+    resetIdle();
+  }
+  function stopIdleWatcher() {
+    document.removeEventListener('mousemove', resetIdle);
+    document.removeEventListener('keydown', resetIdle);
+    document.body.classList.remove('idle');
+    clearTimeout(idleTimer);
+  }
+  function resetIdle() {
+    document.body.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function(){
+      document.body.classList.add('idle');
+    }, 2500);
+  }
+
+  /* ---------- BIND EXTRA EVENTS ---------- */
+  function bindExtraFeatures() {
+    var $draftsBtn = document.getElementById('drafts-toggle');
+    var $draftsClose = document.getElementById('drafts-close');
+    var $draftsBackdrop = document.getElementById('drafts-backdrop');
+    var $draftSave = document.getElementById('draft-save');
+    var $draftNew = document.getElementById('draft-new');
+    var $fsBtn = document.getElementById('fullscreen-toggle');
+    var $markerBtn = document.getElementById('marker-toggle');
+
+    if ($draftsBtn) $draftsBtn.addEventListener('click', openDraftsPanel);
+    if ($draftsClose) $draftsClose.addEventListener('click', closeDraftsPanel);
+    if ($draftsBackdrop) $draftsBackdrop.addEventListener('click', closeDraftsPanel);
+    if ($draftSave) $draftSave.addEventListener('click', saveCurrentAsDraft);
+    if ($draftNew) $draftNew.addEventListener('click', newDraft);
+    if ($fsBtn) $fsBtn.addEventListener('click', toggleFullscreen);
+    if ($markerBtn) $markerBtn.addEventListener('click', toggleMarker);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+
+    loadMarkerPref();
+    renderDrafts();
   }
 
   /* Expose Select Control to Public TelePrompter Object */

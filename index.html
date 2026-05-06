@@ -92,6 +92,37 @@
   </head>
 
   <body id="gui">
+    <!-- Drafts (saved scripts) panel -->
+    <aside id="drafts-panel" class="drafts-panel" aria-hidden="true">
+      <div class="drafts-header">
+        <h2>Saved Scripts</h2>
+        <button class="drafts-close" id="drafts-close" aria-label="Close" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="drafts-actions">
+        <button class="drafts-btn primary" id="draft-save">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save Current
+        </button>
+        <button class="drafts-btn" id="draft-new">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New
+        </button>
+      </div>
+      <ul class="drafts-list" id="drafts-list"></ul>
+      <p class="drafts-empty" id="drafts-empty">No saved scripts yet. Click <strong>Save Current</strong> to keep this one.</p>
+    </aside>
+    <div id="drafts-backdrop" class="drafts-backdrop" hidden></div>
+
+    <!-- Countdown overlay before play -->
+    <div id="countdown" class="countdown" hidden aria-live="assertive">
+      <div class="countdown-num">3</div>
+    </div>
+
+    <!-- Reading marker (centered horizontal line) -->
+    <div id="reading-marker" class="reading-marker" hidden aria-hidden="true"></div>
+
     <div id="modal">
       <a class="button icon-remove-circle close-modal" href="javascript:void(0)" role="button" aria-label="Close Modal" title="Close Modal" data-ga data-category="Nav" data-action="Modal" data-label="Close Modal"></a>
 
@@ -125,6 +156,11 @@
         </svg>
         <span class="brand">Teleprompter</span>
         <span class="clock">00:00:00</span>
+        <span class="stats" id="stats" aria-live="polite">
+          <span class="stat-words"><span id="word-count">0</span> words</span>
+          <span class="stat-sep">·</span>
+          <span class="stat-time" id="reading-time">~0:00</span>
+        </span>
       </h1>
       <nav>
         <div class="colors" role="group" aria-label="Color Pickers">
@@ -144,6 +180,16 @@
           </label>
         </div>
         <div class="buttons" role="group" aria-label="TelePrompter Controls">
+          <button class="theme-toggle" id="drafts-toggle" aria-label="Drafts" title="Saved Scripts" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+          </button>
+          <button class="theme-toggle" id="fullscreen-toggle" aria-label="Fullscreen" title="Toggle Fullscreen" type="button">
+            <svg class="icon-fs-enter" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V3h4"></path><path d="M21 7V3h-4"></path><path d="M3 17v4h4"></path><path d="M21 17v4h-4"></path></svg>
+            <svg class="icon-fs-exit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><path d="M8 3v4H4"></path><path d="M16 3v4h4"></path><path d="M8 21v-4H4"></path><path d="M16 21v-4h4"></path></svg>
+          </button>
+          <button class="theme-toggle" id="marker-toggle" aria-label="Reading Marker" title="Toggle Reading Marker" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><polyline points="6 8 3 12 6 16"></polyline><polyline points="18 8 21 12 18 16"></polyline></svg>
+          </button>
           <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme" title="Toggle Light / Dark Theme" type="button">
             <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
             <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
