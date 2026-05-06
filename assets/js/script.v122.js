@@ -64,6 +64,7 @@ var TelePrompter = (function() {
     $elm.buttonPlay = $('.button.play');
     $elm.buttonRemote = $('.button.remote');
     $elm.buttonReset = $('.button.reset');
+    $elm.buttonThemeToggle = $('#theme-toggle');
     $elm.closeModal = $('.close-modal');
     $elm.fontSize = $('.font_size');
     $elm.gaInput = $('input[data-ga], textarea[data-ga], select[data-ga]');
@@ -89,6 +90,7 @@ var TelePrompter = (function() {
     $elm.buttonPlay.on('click.teleprompter', handlePlay);
     $elm.buttonRemote.on('click.teleprompter', handleRemote);
     $elm.buttonReset.on('click.teleprompter', handleReset);
+    $elm.buttonThemeToggle.on('click.teleprompter', handleThemeToggle);
     $elm.closeModal.on('click.teleprompter', handleCloseModal);
     $elm.gaInput.on('change.teleprompter', gaInput);
     $elm.gaLinks.on('click.teleprompter', gaLinks);
@@ -783,6 +785,38 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Remote Button Pressed');
     }
+  }
+
+  /**
+   * Handle Theme Toggle Button
+   */
+  function handleThemeToggle() {
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+
+    if (debug) {
+      console.log('[TP]', 'Theme Changed:', next);
+    }
+
+    clearTimeout(timerGA);
+    timerGA = setTimeout(function() {
+      gaEvent('TP', 'Theme Changed', next);
+    }, timerExp);
+  }
+
+  /**
+   * Apply Theme (light or dark) and persist to localStorage
+   * @param {String} theme
+   */
+  function setTheme(theme) {
+    if (theme !== 'dark' && theme !== 'light') {
+      return;
+    }
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('teleprompter_theme', theme);
+    } catch (e) {}
   }
 
   /**

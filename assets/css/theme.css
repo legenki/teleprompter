@@ -1,0 +1,145 @@
+/* Theme tokens - inspired by ba-driving-exam */
+/* Note: TelePrompter article/text has its own user-configurable colors.
+   These tokens style the surrounding UI (header, controls, modal). */
+:root {
+  --tp-ui-bg: #f9f9f8;
+  --tp-ui-surface: #ffffff;
+  --tp-ui-surface2: #f3f3f0;
+  --tp-ui-surface3: #eeecea;
+  --tp-ui-border: #e5e4df;
+  --tp-ui-text: #1a1916;
+  --tp-ui-muted: #6b6963;
+  --tp-ui-accent: #d97706;
+  --tp-ui-accent-soft: #fef3c7;
+  --tp-ui-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .06);
+  --tp-ui-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tp-prompter-font: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --tp-ui-bg: #121212;
+  --tp-ui-surface: #1e1e1e;
+  --tp-ui-surface2: #2a2a2a;
+  --tp-ui-surface3: #333333;
+  --tp-ui-border: #404040;
+  --tp-ui-text: #e8e8e8;
+  --tp-ui-muted: #a8a8a8;
+  --tp-ui-accent: #d97706;
+  --tp-ui-accent-soft: #704100;
+  --tp-ui-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 4px 12px rgba(0, 0, 0, .2);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--tp-ui-border);
+  color: var(--tp-ui-text);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin: 12px 12px 0 0;
+  vertical-align: top;
+  transition: background .15s, border-color .15s;
+}
+
+.theme-toggle:hover {
+  background: var(--tp-ui-surface2);
+  border-color: var(--tp-ui-accent);
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle .icon-sun {
+  display: inline;
+}
+
+:root:not([data-theme="dark"]) .theme-toggle .icon-moon {
+  display: inline;
+}
+
+/* Apply Inter Tight to teleprompter article text */
+article .teleprompter,
+article .teleprompter p {
+  font-family: var(--tp-prompter-font);
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.01em;
+}
+
+/* === UI THEME OVERRIDES (header / controls / modal) === */
+/* Apply Inter UI font to chrome, but DO NOT cascade text color to article
+   so the user-configured prompter text/background remain authoritative. */
+body {
+  font-family: var(--tp-ui-font);
+  background-color: var(--tp-ui-bg);
+}
+
+header {
+  background-color: var(--tp-ui-surface);
+  border-bottom-color: var(--tp-ui-border) !important;
+  color: var(--tp-ui-text);
+}
+
+/* Article keeps its own user-configurable colors — don't theme it */
+article {
+  color: #fff;
+}
+
+header h1 {
+  color: var(--tp-ui-accent);
+}
+
+header h1 span.clock {
+  color: var(--tp-ui-text);
+}
+
+.button {
+  color: var(--tp-ui-text);
+}
+
+.button.active {
+  color: var(--tp-ui-accent);
+}
+
+.marker {
+  color: var(--tp-ui-accent);
+}
+
+article .teleprompter p:last-child {
+  border-bottom-color: var(--tp-ui-accent) !important;
+}
+
+article .teleprompter p {
+  border-bottom-color: var(--tp-ui-border);
+}
+
+input[type="color"] {
+  border-color: var(--tp-ui-border);
+}
+
+#software-update {
+  background: var(--tp-ui-surface);
+  color: var(--tp-ui-text);
+}
+
+#software-update a {
+  background: var(--tp-ui-text);
+  color: var(--tp-ui-surface);
+}
+
+#software-update a:hover {
+  background-color: var(--tp-ui-accent);
+}
+
+.remote-id,
+.remote-url {
+  color: var(--tp-ui-accent);
+}
