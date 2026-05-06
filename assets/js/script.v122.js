@@ -1003,13 +1003,14 @@ var TelePrompter = (function() {
       return;
     }
 
-    socket = (window.location.hostname === 'promptr.tv') ?
-      io.connect('https://promptr.tv', {
-        path: '/remote/socket.io'
-      }) :
-      io.connect('http://' + window.location.hostname + ':3000', {
-        path: '/socket.io'
-      });
+    // Use current protocol for socket connection (http or https)
+    var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+    var port = window.location.port ? ':' + window.location.port : '';
+    var socketUrl = protocol + '//' + window.location.hostname + port;
+
+    socket = io.connect(socketUrl, {
+      path: '/socket.io'
+    });
 
     remote = (currentRemote) ? currentRemote : randomString();
 
@@ -1018,11 +1019,9 @@ var TelePrompter = (function() {
       $code.innerHTML = '';
       socket.emit('connectToRemote', 'REMOTE_' + remote);
 
-      $elm.remoteURL.text((window.location.hostname === 'promptr.tv') ? 'https://promptr.tv/remote' : 'http://' + window.location.hostname + ':3000');
+      $elm.remoteURL.text(protocol + '//' + window.location.hostname + port + '/remote');
 
-      var url = (window.location.hostname === 'promptr.tv') ?
-        'https://promptr.tv/remote?id=' + remote :
-        'http://' + window.location.hostname + ':3000/?id=' + remote;
+      var url = protocol + '//' + window.location.hostname + port + '/remote?id=' + remote;
 
       new QRCode($code, url);
       $elm.remoteID.text(remote);
@@ -1390,25 +1389,34 @@ var TelePrompter = (function() {
    * Push Config Params into URL for Sharable Configuration
    */
   function updateURL() {
-    var custom = Object.assign({}, config);
-    var keys = Object.keys(custom);
-
-    keys.forEach(function(key) {
-      // Remove Default Settings from URL
-      if (custom[key] === defaultConfig[key]) {
-        delete custom[key];
-      }
-    });
-
-    if (Object.keys(custom).length > 0) {
-      var urlParams = new URLSearchParams(custom);
-      window.history.pushState(custom, 'TelePrompter', '/?' + urlParams);
-    } else {
-      window.history.pushState(null, 'TelePrompter', '/');
+    // Skip URL updates if running from file:// protocol (local development without server)
+    if (window.location.protocol === 'file:') {
+      return;
     }
 
-    if (debug) {
-      console.log('[TP]', 'URL Updated:', custom);
+    try {
+      var custom = Object.assign({}, config);
+      var keys = Object.keys(custom);
+
+      keys.forEach(function(key) {
+        // Remove Default Settings from URL
+        if (custom[key] === defaultConfig[key]) {
+          delete custom[key];
+        }
+      });
+
+      if (Object.keys(custom).length > 0) {
+        var urlParams = new URLSearchParams(custom);
+        window.history.pushState(custom, 'TelePrompter', '/?' + urlParams);
+      } else {
+        window.history.pushState(null, 'TelePrompter', '/');
+      }
+
+      if (debug) {
+        console.log('[TP]', 'URL Updated:', custom);
+      }
+    } catch (error) {
+      console.warn('Failed to update URL:', error);
     }
   }
 

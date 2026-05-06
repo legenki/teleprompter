@@ -85,8 +85,10 @@
         }
         js = d.createElement(s);
         js.id = id;
-        js.src = (window.location.hostname === 'promptr.tv') ? 'https://promptr.tv/remote/socket.io/socket.io.js' :
-          'http://' + window.location.hostname + ':3000/socket.io/socket.io.js';
+        // Use protocol-relative URL to support both http and https
+        var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+        var port = window.location.port ? ':' + window.location.port : '';
+        js.src = protocol + '//' + window.location.hostname + port + '/socket.io/socket.io.js';
         tjs.parentNode.insertBefore(js, tjs);
       }(document, 'script', 'teleprompter-socket'));
 

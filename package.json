@@ -29,7 +29,9 @@
     "start": "forever start -w --minUptime 1000 --spinSleepTime 1000 -m 1 -l server.log --append -o ./server-stdout.log -e ./server-stderr.log server.js",
     "stop": "forever stop -w --minUptime 1000 --spinSleepTime 1000 -m 1 -l server.log --append -o ./server-stdout.log -e ./server-stderr.log server.js",
     "client": "http-server --cors -p 8080 -o",
-    "server": "node server.js"
+    "server": "node server.js",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix"
   },
   "dependencies": {
     "express": "^4.18.2",
