@@ -1512,7 +1512,7 @@ var TelePrompter = (function() {
 
   /**
    * ==================================================
-   * Extra UI Features: Drafts / Countdown / Marker / Fullscreen
+   * Extra UI Features: Drafts / Countdown / Marker
    * ==================================================
    */
 
@@ -1674,45 +1674,6 @@ var TelePrompter = (function() {
     } catch (e) {}
   }
 
-  /* ---------- FULLSCREEN ---------- */
-  var idleTimer;
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      (document.documentElement.requestFullscreen || function(){})
-        .call(document.documentElement);
-    } else {
-      (document.exitFullscreen || function(){}).call(document);
-    }
-  }
-  function onFullscreenChange() {
-    var on = !!document.fullscreenElement;
-    document.body.classList.toggle('fullscreen-mode', on);
-    var $enter = document.querySelector('#fullscreen-toggle .icon-fs-enter');
-    var $exit  = document.querySelector('#fullscreen-toggle .icon-fs-exit');
-    if ($enter) $enter.style.display = on ? 'none' : '';
-    if ($exit)  $exit.style.display  = on ? '' : 'none';
-    if (on) startIdleWatcher();
-    else stopIdleWatcher();
-  }
-  function startIdleWatcher() {
-    document.addEventListener('mousemove', resetIdle);
-    document.addEventListener('keydown', resetIdle);
-    resetIdle();
-  }
-  function stopIdleWatcher() {
-    document.removeEventListener('mousemove', resetIdle);
-    document.removeEventListener('keydown', resetIdle);
-    document.body.classList.remove('idle');
-    clearTimeout(idleTimer);
-  }
-  function resetIdle() {
-    document.body.classList.remove('idle');
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(function(){
-      document.body.classList.add('idle');
-    }, 2500);
-  }
-
   /* ---------- BIND EXTRA EVENTS ---------- */
   function bindExtraFeatures() {
     var $draftsBtn = document.getElementById('drafts-toggle');
@@ -1720,7 +1681,6 @@ var TelePrompter = (function() {
     var $draftsBackdrop = document.getElementById('drafts-backdrop');
     var $draftSave = document.getElementById('draft-save');
     var $draftNew = document.getElementById('draft-new');
-    var $fsBtn = document.getElementById('fullscreen-toggle');
     var $markerBtn = document.getElementById('marker-toggle');
 
     if ($draftsBtn) $draftsBtn.addEventListener('click', openDraftsPanel);
@@ -1728,9 +1688,7 @@ var TelePrompter = (function() {
     if ($draftsBackdrop) $draftsBackdrop.addEventListener('click', closeDraftsPanel);
     if ($draftSave) $draftSave.addEventListener('click', saveCurrentAsDraft);
     if ($draftNew) $draftNew.addEventListener('click', newDraft);
-    if ($fsBtn) $fsBtn.addEventListener('click', toggleFullscreen);
     if ($markerBtn) $markerBtn.addEventListener('click', toggleMarker);
-    document.addEventListener('fullscreenchange', onFullscreenChange);
 
     loadMarkerPref();
     renderDrafts();

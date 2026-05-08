@@ -353,7 +353,7 @@ header nav {
   background: var(--tp-ui-accent) !important;
 }
 
-/* Auxiliary header buttons (drafts, fullscreen, marker) */
+/* Auxiliary header buttons (drafts, marker) */
 .theme-toggle {
   appearance: none;
   background: transparent;
@@ -599,17 +599,6 @@ header nav {
 .reading-marker::after {
   right: 0;
   border-right: 10px solid var(--tp-ui-accent);
-}
-
-/* === FULLSCREEN === */
-body.fullscreen-mode header {
-  transition: transform .3s;
-}
-body.fullscreen-mode.idle header {
-  transform: translateY(-100%);
-}
-body.fullscreen-mode.idle {
-  cursor: none;
 }
 
 /* Responsive: stack on small screens */
