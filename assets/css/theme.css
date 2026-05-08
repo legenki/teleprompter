@@ -38,6 +38,45 @@
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
 }
 
+/* === LAYOUT FIXES === */
+/* The teleprompter scrolls inside <article> only — body/html should not scroll */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Article fills the viewport below the header and scrolls internally */
+article {
+  position: absolute !important;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto !important;
+  width: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Hide scrollbars (Webkit, Firefox, IE) — keep scrolling functional */
+article {
+  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;  /* IE / old Edge */
+}
+article::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;             /* Chrome / Safari / new Edge */
+}
+
+/* Remove the article's hard-coded background so it inherits theme */
+article .teleprompter {
+  width: 100%;
+}
+
 /* === MODERN TOPBAR === */
 header {
   height: 56px !important;
