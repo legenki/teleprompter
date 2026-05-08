@@ -155,7 +155,6 @@ header nav {
 
 .colors input[type="color"]:hover {
   border-color: var(--tp-ui-accent) !important;
-  transform: scale(1.05);
 }
 
 .colors input[type="color"]::-webkit-color-swatch-wrapper {
@@ -219,6 +218,10 @@ header nav {
 .sliders .ui-slider-handle {
   width: 14px !important;
   height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  max-width: 14px !important;
+  max-height: 14px !important;
   top: -5px !important;
   border-radius: 50% !important;
   background: var(--tp-ui-accent) !important;
@@ -226,6 +229,17 @@ header nav {
   box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
   cursor: grab;
   margin-left: -7px !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+}
+.sliders .ui-slider-handle:hover,
+.sliders .ui-slider-handle:focus,
+.sliders .ui-slider-handle.ui-state-hover,
+.sliders .ui-slider-handle.ui-state-focus,
+.sliders .ui-slider-handle.ui-state-active {
+  background: var(--tp-ui-accent-hover) !important;
+  border-color: var(--tp-ui-surface) !important;
+  cursor: grabbing;
 }
 
 .sliders .ui-slider-range,
@@ -314,9 +328,12 @@ header nav {
 }
 
 .buttons .button.play:hover {
-  background: var(--tp-ui-accent) !important;
+  background: var(--tp-ui-accent-hover) !important;
   color: #fff !important;
-  transform: scale(1.05);
+  transform: scale(0.95);
+}
+.buttons .button.play:active {
+  transform: scale(0.92);
 }
 
 .buttons .button.play.icon-pause {
