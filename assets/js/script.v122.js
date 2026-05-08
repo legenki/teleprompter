@@ -64,7 +64,6 @@ var TelePrompter = (function() {
     $elm.buttonPlay = $('.button.play');
     $elm.buttonRemote = $('.button.remote');
     $elm.buttonReset = $('.button.reset');
-    $elm.buttonThemeToggle = $('#theme-toggle');
     $elm.closeModal = $('.close-modal');
     $elm.fontSize = $('.font_size');
     $elm.gaInput = $('input[data-ga], textarea[data-ga], select[data-ga]');
@@ -90,7 +89,6 @@ var TelePrompter = (function() {
     $elm.buttonPlay.on('click.teleprompter', handlePlay);
     $elm.buttonRemote.on('click.teleprompter', handleRemote);
     $elm.buttonReset.on('click.teleprompter', handleReset);
-    $elm.buttonThemeToggle.on('click.teleprompter', handleThemeToggle);
     $elm.closeModal.on('click.teleprompter', handleCloseModal);
     $elm.gaInput.on('change.teleprompter', gaInput);
     $elm.gaLinks.on('click.teleprompter', gaLinks);
@@ -797,87 +795,58 @@ var TelePrompter = (function() {
   }
 
   /**
-   * Handle Theme Toggle Button
-   */
-  function handleThemeToggle() {
-    var current = document.documentElement.getAttribute('data-theme');
-    var next = current === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-
-    if (debug) {
-      console.log('[TP]', 'Theme Changed:', next);
-    }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function() {
-      gaEvent('TP', 'Theme Changed', next);
-    }, timerExp);
-  }
-
-  /**
-   * On startup, align prompter colors with the active theme so it
-   * doesn't look mismatched (e.g. dark text on dark background) on
-   * first paint. Called once after initSettings/initUI.
+   * Apply default GitHub-dark prompter colors on first run.
+   * Re-running on each load ensures the prompter always matches the
+   * dark UI; user can still override via the color pickers, the
+   * choice persists in localStorage from initSettings().
    */
   function syncPrompterToTheme() {
-    var theme = document.documentElement.getAttribute('data-theme') || 'light';
-    setTheme(theme);
-  }
+    // Cleanup the obsolete theme key (light theme is gone)
+    try { localStorage.removeItem('teleprompter_theme'); } catch (e) {}
 
-  /**
-   * Apply Theme (light or dark) and persist to localStorage.
-   * Also updates the teleprompter article colors (text + background)
-   * to match the theme. The user may still override via color pickers.
-   * @param {String} theme
-   */
-  function setTheme(theme) {
-    if (theme !== 'dark' && theme !== 'light') {
-      return;
-    }
-    document.documentElement.setAttribute('data-theme', theme);
+    var hasUserBg = false;
+    var hasUserText = false;
+    var savedBg = '';
+    var savedText = '';
     try {
-      localStorage.setItem('teleprompter_theme', theme);
+      savedBg = localStorage.getItem('teleprompter_background_color') || '';
+      savedText = localStorage.getItem('teleprompter_text_color') || '';
+      hasUserBg = !!savedBg;
+      hasUserText = !!savedText;
     } catch (e) {}
 
-    // Apply matching prompter colors for the theme (GitHub palette)
-    var prompterBg = theme === 'dark' ? '#0d1117' : '#ffffff';
-    var prompterText = theme === 'dark' ? '#f0f6fc' : '#1f2328';
+    var prompterBg = '#0d1117';
+    var prompterText = '#f0f6fc';
 
-    config.backgroundColor = prompterBg;
-    config.textColor = prompterText;
+    // Migrate from removed light-theme defaults
+    if (savedBg.toLowerCase() === '#ffffff') hasUserBg = false;
+    if (savedText.toLowerCase() === '#1f2328' || savedText.toLowerCase() === '#1a1916') hasUserText = false;
 
-    // Sync color pickers
-    if ($elm.backgroundColor && $elm.backgroundColor.length) {
-      $elm.backgroundColor.val(prompterBg);
-    }
-    if ($elm.textColor && $elm.textColor.length) {
-      $elm.textColor.val(prompterText);
-    }
+    if (hasUserBg && hasUserText) return;
 
-    // Apply to DOM
-    if ($elm.article && $elm.article.length) {
-      $elm.article.css('background-color', prompterBg);
-    }
-    if ($elm.body && $elm.body.length) {
-      $elm.body.css('background-color', prompterBg);
-    }
-    if ($elm.teleprompter && $elm.teleprompter.length) {
-      $elm.teleprompter.css('background-color', prompterBg);
-      $elm.teleprompter.css('color', prompterText);
+    if (!hasUserBg) {
+      config.backgroundColor = prompterBg;
+      if ($elm.backgroundColor && $elm.backgroundColor.length) {
+        $elm.backgroundColor.val(prompterBg);
+      }
+      if ($elm.article && $elm.article.length) {
+        $elm.article.css('background-color', prompterBg);
+      }
+      if ($elm.teleprompter && $elm.teleprompter.length) {
+        $elm.teleprompter.css('background-color', prompterBg);
+      }
+      try { localStorage.setItem('teleprompter_background_color', prompterBg); } catch (e) {}
     }
 
-    // Persist user preference
-    try {
-      localStorage.setItem('teleprompter_background_color', prompterBg);
-      localStorage.setItem('teleprompter_text_color', prompterText);
-    } catch (e) {}
-
-    // Sync to remote if connected
-    if (socket && remote) {
-      clearTimeout(emitTimeout);
-      emitTimeout = setTimeout(function() {
-        socket.emit('clientCommand', 'updateConfig', config);
-      }, timerExp);
+    if (!hasUserText) {
+      config.textColor = prompterText;
+      if ($elm.textColor && $elm.textColor.length) {
+        $elm.textColor.val(prompterText);
+      }
+      if ($elm.teleprompter && $elm.teleprompter.length) {
+        $elm.teleprompter.css('color', prompterText);
+      }
+      try { localStorage.setItem('teleprompter_text_color', prompterText); } catch (e) {}
     }
   }
 

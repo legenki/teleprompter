@@ -1,28 +1,9 @@
-/* Theme tokens - GitHub Primer-inspired palette
+/* Theme tokens - GitHub Dark palette
    (https://primer.style/foundations/color)
+   Single dark theme — light variant removed.
    Note: TelePrompter article/text has its own user-configurable colors.
    These tokens style the surrounding UI (header, controls, modal). */
 :root {
-  /* GitHub Light */
-  --tp-ui-bg: #ffffff;
-  --tp-ui-surface: #ffffff;
-  --tp-ui-surface2: #f6f8fa;
-  --tp-ui-surface3: #eaeef2;
-  --tp-ui-border: #d0d7de;
-  --tp-ui-text: #1f2328;
-  --tp-ui-muted: #59636e;
-  --tp-ui-accent: #0969da;          /* GitHub blue (links / accent) */
-  --tp-ui-accent-hover: #0550ae;
-  --tp-ui-accent-soft: #ddf4ff;
-  --tp-ui-success: #1a7f37;         /* GitHub green (PR merged) */
-  --tp-ui-danger: #cf222e;
-  --tp-ui-shadow: 0 1px 0 rgba(31,35,40,.04), 0 1px 3px rgba(31,35,40,.06);
-  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
-}
-
-[data-theme="dark"] {
-  /* GitHub Dark */
   --tp-ui-bg: #0d1117;
   --tp-ui-surface: #0d1117;
   --tp-ui-surface2: #151b23;
@@ -30,12 +11,14 @@
   --tp-ui-border: #3d444d;
   --tp-ui-text: #f0f6fc;
   --tp-ui-muted: #9198a1;
-  --tp-ui-accent: #4493f8;          /* GitHub dark mode blue */
+  --tp-ui-accent: #4493f8;
   --tp-ui-accent-hover: #58a6ff;
   --tp-ui-accent-soft: rgba(56, 139, 253, .15);
   --tp-ui-success: #3fb950;
   --tp-ui-danger: #f85149;
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
+  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
 /* === LAYOUT FIXES === */
@@ -80,21 +63,12 @@ article .teleprompter {
 /* === MODERN TOPBAR === */
 header {
   height: 56px !important;
-  background: var(--tp-ui-surface) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--tp-ui-surface2) !important;
   border-bottom: 1px solid var(--tp-ui-border) !important;
   display: flex !important;
   align-items: center;
   padding: 0 16px;
   gap: 12px;
-}
-
-[data-theme="dark"] header {
-  background: var(--tp-ui-surface2) !important;
-}
-:root:not([data-theme="dark"]) header {
-  background: var(--tp-ui-surface) !important;
 }
 
 header h1 {
@@ -376,14 +350,10 @@ header nav {
 }
 
 .buttons .button.play.icon-pause {
-  background: var(--tp-ui-text) !important;
-}
-
-[data-theme="dark"] .buttons .button.play.icon-pause {
   background: var(--tp-ui-accent) !important;
 }
 
-/* Theme toggle button */
+/* Auxiliary header buttons (drafts, fullscreen, marker) */
 .theme-toggle {
   appearance: none;
   background: transparent;
@@ -403,22 +373,9 @@ header nav {
 }
 
 .theme-toggle:hover {
-  background: var(--tp-ui-surface2);
+  background: var(--tp-ui-surface3);
   border-color: var(--tp-ui-accent);
   color: var(--tp-ui-accent);
-}
-
-.theme-toggle .icon-sun,
-.theme-toggle .icon-moon {
-  display: none;
-}
-
-[data-theme="dark"] .theme-toggle .icon-sun {
-  display: inline;
-}
-
-:root:not([data-theme="dark"]) .theme-toggle .icon-moon {
-  display: inline;
 }
 
 /* Hide help button styles in case CSS is still loaded */
