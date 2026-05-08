@@ -569,37 +569,53 @@ header nav {
   100% { transform: scale(.9); opacity: 0; }
 }
 
-/* === READING MARKER === */
-.reading-marker[hidden] { display: none !important; }
-.reading-marker {
-  position: fixed;
+/* === READING FOCUS overlay (modern dim) ===
+   The original CSS used <div class="overlay"> with .top and .bottom
+   black bars. We modernise it: a single full-screen overlay that
+   uses CSS mask to cut out a "reading band" in the center, with two
+   subtle accent guide lines at the band's top and bottom edges. */
+.overlay {
+  display: none;
+  position: fixed !important;
+  top: 56px !important;          /* below header */
   left: 0;
   right: 0;
-  top: 50%;
-  height: 0;
-  border-top: 2px dashed var(--tp-ui-accent);
+  bottom: 0;
+  height: auto !important;
+  width: 100% !important;
   z-index: 50;
   pointer-events: none;
-  opacity: .7;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, .78) 0%,
+    rgba(0, 0, 0, .78) calc(50% - 70px),
+    rgba(0, 0, 0, 0)   calc(50% - 50px),
+    rgba(0, 0, 0, 0)   calc(50% + 50px),
+    rgba(0, 0, 0, .78) calc(50% + 70px),
+    rgba(0, 0, 0, .78) 100%
+  );
 }
-.reading-marker::before,
-.reading-marker::after {
+/* Hide the legacy .top / .bottom child divs that used to provide
+   the dim — they are no longer needed with the gradient approach. */
+.overlay .top,
+.overlay .bottom {
+  display: none !important;
+}
+
+/* Two accent guide lines marking the reading band */
+.overlay::before,
+.overlay::after {
   content: '';
   position: absolute;
-  top: -7px;
-  width: 0;
-  height: 0;
-  border-top: 6px solid transparent;
-  border-bottom: 6px solid transparent;
-}
-.reading-marker::before {
   left: 0;
-  border-left: 10px solid var(--tp-ui-accent);
-}
-.reading-marker::after {
   right: 0;
-  border-right: 10px solid var(--tp-ui-accent);
+  height: 1px;
+  background: var(--tp-ui-accent);
+  opacity: .6;
+  box-shadow: 0 0 8px var(--tp-ui-accent);
 }
+.overlay::before { top: calc(50% - 60px); }
+.overlay::after  { top: calc(50% + 60px); }
 
 /* Responsive: stack on small screens */
 @media (max-width: 720px) {

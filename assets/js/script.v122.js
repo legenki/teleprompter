@@ -571,10 +571,11 @@ var TelePrompter = (function() {
     } else {
       config.dimControls = true;
       $elm.buttonDimControls.removeClass('icon-eye-open').addClass('icon-eye-close');
-
+      // Show focus overlay immediately so the effect is visible even
+      // before play; header dims only while actually playing.
+      $elm.markerOverlay.fadeIn('slow');
       if (isPlaying) {
         $elm.headerContent.fadeTo('slow', 0.15);
-        $elm.markerOverlay.fadeIn('slow');
       }
     }
 
@@ -1512,7 +1513,7 @@ var TelePrompter = (function() {
 
   /**
    * ==================================================
-   * Extra UI Features: Drafts / Countdown / Marker
+   * Extra UI Features: Drafts / Countdown
    * ==================================================
    */
 
@@ -1658,22 +1659,6 @@ var TelePrompter = (function() {
     tick();
   }
 
-  /* ---------- READING MARKER ---------- */
-  function toggleMarker() {
-    var $m = document.getElementById('reading-marker');
-    if (!$m) return;
-    var on = $m.hidden;
-    $m.hidden = !on;
-    try { localStorage.setItem('teleprompter_marker', on ? '1' : '0'); } catch (e) {}
-  }
-  function loadMarkerPref() {
-    try {
-      var v = localStorage.getItem('teleprompter_marker');
-      var $m = document.getElementById('reading-marker');
-      if ($m && v === '1') $m.hidden = false;
-    } catch (e) {}
-  }
-
   /* ---------- BIND EXTRA EVENTS ---------- */
   function bindExtraFeatures() {
     var $draftsBtn = document.getElementById('drafts-toggle');
@@ -1681,16 +1666,13 @@ var TelePrompter = (function() {
     var $draftsBackdrop = document.getElementById('drafts-backdrop');
     var $draftSave = document.getElementById('draft-save');
     var $draftNew = document.getElementById('draft-new');
-    var $markerBtn = document.getElementById('marker-toggle');
 
     if ($draftsBtn) $draftsBtn.addEventListener('click', openDraftsPanel);
     if ($draftsClose) $draftsClose.addEventListener('click', closeDraftsPanel);
     if ($draftsBackdrop) $draftsBackdrop.addEventListener('click', closeDraftsPanel);
     if ($draftSave) $draftSave.addEventListener('click', saveCurrentAsDraft);
     if ($draftNew) $draftNew.addEventListener('click', newDraft);
-    if ($markerBtn) $markerBtn.addEventListener('click', toggleMarker);
 
-    loadMarkerPref();
     renderDrafts();
   }
 
