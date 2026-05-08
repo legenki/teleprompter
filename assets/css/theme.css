@@ -1,21 +1,20 @@
-/* Theme tokens - GitHub Dark palette
-   (https://primer.style/foundations/color)
+/* Theme tokens - warm dark palette.
    Single dark theme — light variant removed.
    Note: TelePrompter article/text has its own user-configurable colors.
    These tokens style the surrounding UI (header, controls, modal). */
 :root {
-  --tp-ui-bg: #0d1117;
-  --tp-ui-surface: #0d1117;
-  --tp-ui-surface2: #151b23;
-  --tp-ui-surface3: #212830;
-  --tp-ui-border: #3d444d;
-  --tp-ui-text: #f0f6fc;
-  --tp-ui-muted: #9198a1;
-  --tp-ui-accent: #4493f8;
-  --tp-ui-accent-hover: #58a6ff;
-  --tp-ui-accent-soft: rgba(56, 139, 253, .15);
-  --tp-ui-success: #3fb950;
-  --tp-ui-danger: #f85149;
+  --tp-ui-bg: #1f1610;
+  --tp-ui-surface: #1f1610;
+  --tp-ui-surface2: #2a1c14;
+  --tp-ui-surface3: #3a2920;
+  --tp-ui-border: #4a342a;
+  --tp-ui-text: #f4ead8;
+  --tp-ui-muted: #b8a892;
+  --tp-ui-accent: #b3b33b;
+  --tp-ui-accent-hover: #cdcd55;
+  --tp-ui-accent-soft: rgba(179, 179, 59, .15);
+  --tp-ui-success: #93b03b;
+  --tp-ui-danger: #d97443;
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
   --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
   --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -29,6 +28,7 @@ html, body {
   overflow: hidden !important;
   margin: 0;
   padding: 0;
+  background-color: var(--tp-ui-bg) !important;
 }
 
 /* Article fills the viewport below the header and scrolls internally */

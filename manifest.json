@@ -1,6 +1,6 @@
 {
   "app_name": "TelePrompter",
-  "background_color": "#141414",
+  "background_color": "#1f1610",
   "description": "Browser-based TelePrompter with Remote Control",
   "display": "standalone",
   "icons": [
@@ -28,5 +28,5 @@
   "name": "TelePrompter",
   "short_name": "TelePrompter",
   "start_url": "./?utm_source=web_app_manifest",
-  "theme_color": "#4297d7"
+  "theme_color": "#b3b33b"
 }

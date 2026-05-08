@@ -31,14 +31,14 @@ var TelePrompter = (function() {
 
   /* Default App Settings */
   var defaultConfig = {
-    backgroundColor: '#141414',
+    backgroundColor: '#1f1610',
     dimControls: true,
     flipX: false,
     flipY: false,
     fontSize: 60,
     pageSpeed: 35,
     pageScrollPercent: 0,
-    textColor: '#ffffff'
+    textColor: '#b3b33b'
   };
 
   /* Custom App Settings */
@@ -816,12 +816,14 @@ var TelePrompter = (function() {
       hasUserText = !!savedText;
     } catch (e) {}
 
-    var prompterBg = '#0d1117';
-    var prompterText = '#f0f6fc';
+    var prompterBg = '#1f1610';
+    var prompterText = '#b3b33b';
 
-    // Migrate from removed light-theme defaults
-    if (savedBg.toLowerCase() === '#ffffff') hasUserBg = false;
-    if (savedText.toLowerCase() === '#1f2328' || savedText.toLowerCase() === '#1a1916') hasUserText = false;
+    // Migrate from previous default palettes (light + GitHub-dark)
+    var legacyBgs = ['#ffffff', '#0d1117', '#141414'];
+    var legacyText = ['#1f2328', '#1a1916', '#f0f6fc', '#ffffff'];
+    if (legacyBgs.indexOf(savedBg.toLowerCase()) !== -1) hasUserBg = false;
+    if (legacyText.indexOf(savedText.toLowerCase()) !== -1) hasUserText = false;
 
     if (hasUserBg && hasUserText) return;
 
