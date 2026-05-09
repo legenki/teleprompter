@@ -146,17 +146,8 @@ var TelePrompter = (function() {
     timerURL,
     version = 'v1.3.0';
 
-  /* Default App Settings */
-  var defaultConfig = {
-    backgroundColor: '#1f1610',
-    dimControls: true,
-    flipX: false,
-    flipY: false,
-    fontSize: 60,
-    pageSpeed: 35,
-    pageScrollPercent: 0,
-    textColor: '#b3b33b'
-  };
+  /* Default App Settings — defined in config.js, shared with the remote. */
+  var defaultConfig = TPConfig.DEFAULTS;
 
   /* Custom App Settings */
   var config = Object.assign({}, defaultConfig);
@@ -185,7 +176,7 @@ var TelePrompter = (function() {
     $elm.fontSize = $('.font_size');
     $elm.header = $('header');
     $elm.headerContent = $('header h1, header nav');
-    $elm.markerOverlay = $('.marker, .overlay');
+    $elm.markerOverlay = $('.overlay');
     $elm.modal = $('#modal');
     $elm.remoteID = $('.remote-id');
     $elm.remoteURL = $('.remote-url');
@@ -450,7 +441,7 @@ var TelePrompter = (function() {
     });
 
     // Set Overlay and TelePrompter Defaults
-    $elm.markerOverlay.fadeOut(0);
+    $elm.markerOverlay.removeClass('show');
     $elm.teleprompter.css({
       'padding-bottom': Math.ceil($elm.window.height() - $elm.header.height()) + 'px'
     });
@@ -612,13 +603,13 @@ var TelePrompter = (function() {
       config.dimControls = false;
       $elm.buttonDimControls.removeClass('icon-eye-close').addClass('icon-eye-open');
       $elm.headerContent.fadeTo('slow', 1);
-      $elm.markerOverlay.fadeOut('slow');
+      $elm.markerOverlay.removeClass('show');
     } else {
       config.dimControls = true;
       $elm.buttonDimControls.removeClass('icon-eye-open').addClass('icon-eye-close');
       // Show focus overlay immediately so the effect is visible even
       // before play; header dims only while actually playing.
-      $elm.markerOverlay.fadeIn('slow');
+      $elm.markerOverlay.addClass('show');
       if (isPlaying) {
         $elm.headerContent.fadeTo('slow', 0.15);
       }
@@ -942,7 +933,7 @@ var TelePrompter = (function() {
     }
 
     // Check if Escape Key and Modal Open
-    if (evt.keyCode == escape && modalOpen) {
+    if (evt.keyCode === escape && modalOpen) {
       if ($elm.remoteControlModal.is(':visible')) {
         $elm.buttonRemote.focus();
       }
@@ -960,42 +951,42 @@ var TelePrompter = (function() {
     }
 
     // Reset GUI
-    if (evt.keyCode == escape) {
+    if (evt.keyCode === escape) {
       $elm.buttonReset.trigger('click');
       evt.preventDefault();
       evt.stopPropagation();
       return false;
     }
     // Start Stop Scrolling
-    else if (evt.keyCode == space || [b_key, f5_key, period_key].includes(evt.keyCode)) {
+    else if (evt.keyCode === space || [b_key, f5_key, period_key].includes(evt.keyCode)) {
       $elm.buttonPlay.trigger('click');
       evt.preventDefault();
       evt.stopPropagation();
       return false;
     }
     // Decrease Speed
-    else if (evt.keyCode == left || evt.keyCode == page_up) {
+    else if (evt.keyCode === left || evt.keyCode === page_up) {
       $elm.speed.slider('value', speed - 1);
       evt.preventDefault();
       evt.stopPropagation();
       return false;
     }
     // Decrease Font Size
-    else if (evt.keyCode == down) {
+    else if (evt.keyCode === down) {
       $elm.fontSize.slider('value', font_size - 1);
       evt.preventDefault();
       evt.stopPropagation();
       return false;
     }
     // Increase Font Size
-    else if (evt.keyCode == up) {
+    else if (evt.keyCode === up) {
       $elm.fontSize.slider('value', font_size + 1);
       evt.preventDefault();
       evt.stopPropagation();
       return false;
     }
     // Increase Speed
-    else if (evt.keyCode == right || evt.keyCode == page_down) {
+    else if (evt.keyCode === right || evt.keyCode === page_down) {
       $elm.speed.slider('value', speed + 1);
       evt.preventDefault();
       evt.stopPropagation();
@@ -1010,7 +1001,7 @@ var TelePrompter = (function() {
     var offset = 1;
     var animate = 0;
 
-    if (config.pageSpeed == 0) {
+    if (config.pageSpeed === 0) {
       $elm.article.stop().clearQueue();
       clearTimeout(scrollDelay);
       scrollDelay = setTimeout(pageScroll, 500);
@@ -1290,7 +1281,7 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
 
     if (config.dimControls) {
       $elm.headerContent.fadeTo('slow', 0.15);
-      $elm.markerOverlay.fadeIn('slow');
+      $elm.markerOverlay.addClass('show');
     }
 
     timer.startTimer();
@@ -1322,7 +1313,7 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
 
     if (config.dimControls) {
       $elm.headerContent.fadeTo('slow', 1);
-      $elm.markerOverlay.fadeOut('slow');
+      $elm.markerOverlay.removeClass('show');
     }
 
     $elm.buttonPlay.removeClass('icon-pause').addClass('icon-play');
@@ -1416,7 +1407,7 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
    * @returns Boolean
    */
   function updateTeleprompter(evt) {
-    if (evt.keyCode == 27) {
+    if (evt.keyCode === 27) {
       $elm.teleprompter.blur();
       evt.preventDefault();
       evt.stopPropagation();

@@ -26,8 +26,8 @@
   var debounce = 5;
   var count = 0;
 
-  /* Default App Settings */
-  var defaultConfig = {
+  /* Default App Settings — defined in config.js. */
+  var defaultConfig = (typeof TPConfig !== 'undefined' && TPConfig.DEFAULTS) || {
     backgroundColor: '#1f1610',
     dimControls: true,
     flipX: false,
@@ -140,7 +140,7 @@
       $elm.input.classList.remove('error');
       $elm.input.classList.remove('success');
 
-      if (e.keyCode == 13) {
+      if (e.keyCode === 13) {
         handleInput();
       }
     });
