@@ -520,6 +520,9 @@ var TelePrompter = (function() {
     $elm.body.css('background-color', config.backgroundColor);
     localStorage.setItem('teleprompter_background_color', config.backgroundColor);
 
+    // Update the UI surfaces (header, drafts panel, modal, etc.)
+    applySurfaceColor(config.backgroundColor);
+
     if (socket && remote) {
       clearTimeout(emitTimeout);
       emitTimeout = setTimeout(function(){
@@ -828,8 +831,6 @@ var TelePrompter = (function() {
     if (legacyBgs.indexOf(savedBg.toLowerCase()) !== -1) hasUserBg = false;
     if (legacyText.indexOf(savedText.toLowerCase()) !== -1) hasUserText = false;
 
-    if (hasUserBg && hasUserText) return;
-
     if (!hasUserBg) {
       config.backgroundColor = prompterBg;
       if ($elm.backgroundColor && $elm.backgroundColor.length) {
@@ -855,8 +856,9 @@ var TelePrompter = (function() {
       try { localStorage.setItem('teleprompter_text_color', prompterText); } catch (e) {}
     }
 
-    // Bind UI accent to the resolved prompter text color
+    // Bind UI accent and surface colors to the resolved prompter palette
     applyAccentColor(config.textColor);
+    applySurfaceColor(config.backgroundColor);
   }
 
   /**
@@ -898,6 +900,31 @@ var TelePrompter = (function() {
   }
 
   /**
+   * Darken an [r,g,b] color toward black by a given amount (0..1).
+   */
+  function darkenRGB(rgb, amount) {
+    return [
+      Math.max(0, Math.round(rgb[0] * (1 - amount))),
+      Math.max(0, Math.round(rgb[1] * (1 - amount))),
+      Math.max(0, Math.round(rgb[2] * (1 - amount)))
+    ];
+  }
+
+  /**
+   * Relative luminance of an [r,g,b] color (WCAG-style, 0..1).
+   */
+  function luminance(rgb) {
+    var srgb = rgb.map(function(c){
+      var v = c / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+  }
+
+  function rgbStr(rgb) { return rgb[0] + ', ' + rgb[1] + ', ' + rgb[2]; }
+  function rgbCSS(rgb) { return 'rgb(' + rgbStr(rgb) + ')'; }
+
+  /**
    * Bind the user's text color to the UI accent CSS variables so
    * the logo, sliders, play button, focus rings, hover states etc.
    * follow the prompter text color.
@@ -905,16 +932,50 @@ var TelePrompter = (function() {
   function applyAccentColor(color) {
     var rgb = parseColor(color);
     if (!rgb) return;
-
     var hover = lightenRGB(rgb, 0.18);
-    var rgbStr  = rgb[0]   + ', ' + rgb[1]   + ', ' + rgb[2];
-    var hoverStr = hover[0] + ', ' + hover[1] + ', ' + hover[2];
+    var root = document.documentElement.style;
+    root.setProperty('--tp-ui-accent',        rgbCSS(rgb));
+    root.setProperty('--tp-ui-accent-hover',  rgbCSS(hover));
+    root.setProperty('--tp-ui-accent-soft',   'rgba(' + rgbStr(rgb) + ', .15)');
+    root.setProperty('--tp-ui-accent-rgb',    rgbStr(rgb));
+  }
+
+  /**
+   * Bind the user's background color to the UI surface variables.
+   * Generates a coherent multi-step palette from one base color:
+   *   --tp-ui-bg / --tp-ui-surface : the base (header / page bg)
+   *   --tp-ui-surface2             : header / drafts header (one step lighter)
+   *   --tp-ui-surface3             : hover bg (two steps lighter)
+   *   --tp-ui-border               : subtle separator
+   *   --tp-ui-text                 : auto-contrast (warm parchment for
+   *                                  dark bg, deep espresso for light bg)
+   *   --tp-ui-muted                : 60% alpha of text
+   */
+  function applySurfaceColor(color) {
+    var rgb = parseColor(color);
+    if (!rgb) return;
+
+    var lum = luminance(rgb);
+    var isDark = lum < 0.5;
+
+    // Step direction: dark bg → lighten; light bg → darken
+    var step = isDark ? lightenRGB : darkenRGB;
+    var surface2 = step(rgb, 0.10);
+    var surface3 = step(rgb, 0.18);
+    var border   = step(rgb, 0.25);
+
+    // Auto-contrasting text/muted colors
+    var textRGB  = isDark ? [244, 234, 216] : [31, 22, 16];
+    var mutedRGB = isDark ? [184, 168, 146] : [80, 64, 48];
 
     var root = document.documentElement.style;
-    root.setProperty('--tp-ui-accent',        'rgb('  + rgbStr   + ')');
-    root.setProperty('--tp-ui-accent-hover',  'rgb('  + hoverStr + ')');
-    root.setProperty('--tp-ui-accent-soft',   'rgba(' + rgbStr   + ', .15)');
-    root.setProperty('--tp-ui-accent-rgb',    rgbStr);
+    root.setProperty('--tp-ui-bg',       rgbCSS(rgb));
+    root.setProperty('--tp-ui-surface',  rgbCSS(rgb));
+    root.setProperty('--tp-ui-surface2', rgbCSS(surface2));
+    root.setProperty('--tp-ui-surface3', rgbCSS(surface3));
+    root.setProperty('--tp-ui-border',   rgbCSS(border));
+    root.setProperty('--tp-ui-text',     rgbCSS(textRGB));
+    root.setProperty('--tp-ui-muted',    rgbCSS(mutedRGB));
   }
 
   /**
