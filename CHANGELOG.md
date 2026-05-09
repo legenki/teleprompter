@@ -5,6 +5,35 @@ TelePrompter - Change Log
 
 ![icon](assets/img/icon-256x256.png "icon")
 
+:sparkles: v1.3.0 Release Notes ( May 9th, 2026 )
+---
+
+> Major rewrite of the UI by [@legenki](https://github.com/legenki).
+
+### :tada: New features
+- [X] **Saved scripts (drafts)** — keep multiple texts in localStorage, switch between them from a side panel
+- [X] **Word count + reading-time estimate** in the header (recalculated from speed)
+- [X] **3-2-1 countdown** before play
+- [X] **Reading focus mode** — gradient dim of the top/bottom of the screen with two glowing accent guide lines marking the reading band (replaces the old marker / dim split)
+- [X] **Live theming** — both color pickers now retint the whole UI, not just the prompter:
+  - Text color → logo, sliders, play button, focus rings, ::selection, draft highlight
+  - Background color → header, drafts panel, body, modal, slider track; text color is auto-picked for contrast (WCAG luminance)
+- [X] **PWA self-update** — service worker now uses a versioned cache, network-first strategy, and auto-reloads the page when a new build is deployed (fixes the "stuck on old version" bug)
+
+### :art: Visual / UX
+- [X] Modern compact header (56 px) with pill-shaped clock, 28×28 color swatches, round 36 px ghost icon buttons, 40 px filled accent Play button
+- [X] Lucide-style inline SVG icons instead of FontAwesome glyphs for every control
+- [X] Warm two-tone palette by default: olive `#b3b33b` text on espresso `#1f1610` (everything user-overridable)
+- [X] System-safe fonts only — Georgia for prompter / countdown, OS sans-serif for chrome (no Google Fonts fetch)
+- [X] Body and `<article>` no longer scroll independently — single hidden scrollbar inside the prompter, no white gutters
+
+### :broom: Cleanup
+- [X] Removed third-party Google Analytics (was pointing at the original author's account)
+- [X] Removed every `promptr.tv` URL from meta, sitemap, robots, embedded sponsor link
+- [X] Socket.IO bootstrap is protocol-aware; the Remote button hides itself on static hosts where no server is reachable
+- [X] CORS hardened to a configurable allow-list (`CORS_ORIGINS` env var)
+- [X] Input validation + per-IP rate limiting on the Socket.IO server
+
 :white_check_mark: v1.2.2 Release Notes ( January 29th, 2023 )
 ---
 

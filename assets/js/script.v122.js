@@ -3,6 +3,111 @@
  * (c) 2023 Peter Schmalfeldt
  * License: https://github.com/manifestinteractive/teleprompter/blob/master/LICENSE
  */
+// Compatibility shims over jQuery so we can drop jQuery UI (~42 KB)
+// and the legacy fade/animate code paths without rewriting every call.
+(function($) {
+  if (!$) return;
+
+  // ---- $.fn.slider — minimal jQuery UI slider API on <input range>
+  $.fn.slider = function(arg, val) {
+    if (arg === 'value' && val === undefined) {
+      return parseFloat(this[0] && this[0].value);
+    }
+    return this.each(function() {
+      if (typeof arg === 'object' && arg !== null) {
+        if (arg.min   !== undefined) this.min   = arg.min;
+        if (arg.max   !== undefined) this.max   = arg.max;
+        if (arg.value !== undefined) this.value = arg.value;
+        if (typeof arg.slide === 'function' || typeof arg.change === 'function') {
+          var cb = arg.slide || arg.change;
+          this.addEventListener('input', cb);
+        }
+      } else if (arg === 'value') {
+        this.value = val;
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+  };
+
+  // ---- jquery.timer plugin — emit a HH:MM:SS string every second
+  $.fn.timer = function(opts) {
+    opts = opts || {};
+    var elements = this.toArray();
+    var seconds = 0;
+    var iv = null;
+    function fmt(s) {
+      var hh = Math.floor(s / 3600);
+      var mm = Math.floor((s % 3600) / 60);
+      var ss = s % 60;
+      return (hh < 10 ? '0' : '') + hh + ':' +
+             (mm < 10 ? '0' : '') + mm + ':' +
+             (ss < 10 ? '0' : '') + ss;
+    }
+    function render() {
+      var t = fmt(seconds);
+      elements.forEach(function(el) { el.textContent = t; });
+      if (typeof opts.onChange === 'function') opts.onChange(t);
+    }
+    return {
+      startTimer: function() {
+        if (iv) return;
+        iv = setInterval(function() { seconds++; render(); }, 1000);
+      },
+      stopTimer: function() { clearInterval(iv); iv = null; },
+      resetTimer: function() {
+        clearInterval(iv); iv = null;
+        seconds = 0; render();
+      }
+    };
+  };
+
+  // ---- $.fn.fadeIn / fadeOut — replace with CSS opacity transitions
+  function fadeTo(els, target, duration, done) {
+    duration = (duration === 'slow') ? 600 : (duration === 'fast' ? 200 : (duration | 0));
+    els.forEach(function(el) {
+      if (target === 1 && getComputedStyle(el).display === 'none') {
+        el.style.display = '';
+      }
+      el.style.transition = 'opacity ' + duration + 'ms';
+      requestAnimationFrame(function() { el.style.opacity = target; });
+      if (target === 0) {
+        setTimeout(function() { el.style.display = 'none'; }, duration);
+      }
+    });
+    if (typeof done === 'function') setTimeout(done, duration);
+  }
+  $.fn.fadeIn = function(d, done) { fadeTo(this.toArray(), 1, d, done); return this; };
+  $.fn.fadeOut = function(d, done) { fadeTo(this.toArray(), 0, d, done); return this; };
+  $.fn.fadeTo = function(d, op, done) { fadeTo(this.toArray(), op, d, done); return this; };
+
+  // ---- $.fn.animate({scrollTop}) — only the scrollTop case is used here
+  $.fn.animate = function(props, duration, easing, done) {
+    duration = (duration === 'slow') ? 600 : (duration === 'fast' ? 200 : (duration | 0));
+    if (typeof easing === 'function') { done = easing; easing = null; }
+    return this.each(function() {
+      var el = this;
+      if (props.scrollTop !== undefined) {
+        var target = parseFloat(props.scrollTop);
+        if (typeof props.scrollTop === 'string' &&
+            (props.scrollTop.indexOf('+=') === 0 || props.scrollTop.indexOf('-=') === 0)) {
+          var sign = props.scrollTop.indexOf('-=') === 0 ? -1 : 1;
+          target = el.scrollTop + sign * parseFloat(props.scrollTop.slice(2));
+        }
+        if (duration <= 0) {
+          el.scrollTop = target;
+          if (typeof done === 'function') done.call(el);
+        } else {
+          el.scrollTo({ top: target, behavior: 'smooth' });
+          if (typeof done === 'function') setTimeout(function(){ done.call(el); }, duration);
+        }
+      }
+    });
+  };
+  // .stop() / .clearQueue() become no-ops with native scrolling
+  $.fn.stop = function() { return this; };
+  $.fn.clearQueue = function() { return this; };
+})(typeof jQuery !== 'undefined' ? jQuery : null);
+
 var TelePrompter = (function() {
   /**
    * ==================================================
@@ -26,7 +131,7 @@ var TelePrompter = (function() {
     timer,
     timerExp = 10,
     timerURL,
-    version = 'v1.2.2';
+    version = 'v1.3.0';
 
   /* Default App Settings */
   var defaultConfig = {
@@ -369,14 +474,10 @@ var TelePrompter = (function() {
       }
     });
 
-    // Run initial configuration on sliders
-    if (config.fontSize !== defaultConfig.fontSize) {
-      updateFontSize(false);
-    }
-
-    if (config.pageSpeed !== defaultConfig.pageSpeed) {
-      updateSpeed(false);
-    }
+    // Run initial configuration on sliders (always, so the WebKit
+    // --fill gradient is painted for the default values too).
+    updateFontSize(false);
+    updateSpeed(false);
 
     // Clean up Empty Paragraph Tags
     $('p:empty', $elm.teleprompter).remove();
@@ -827,6 +928,18 @@ var TelePrompter = (function() {
 
   function rgbStr(rgb) { return rgb[0] + ', ' + rgb[1] + ', ' + rgb[2]; }
   function rgbCSS(rgb) { return 'rgb(' + rgbStr(rgb) + ')'; }
+
+  /**
+   * Paint the filled portion of a native <input type="range"> via the
+   * --fill CSS variable used by the WebKit gradient track. Firefox
+   * uses ::-moz-range-progress automatically and ignores --fill.
+   */
+  function paintRangeFill(input, min, max) {
+    if (!input) return;
+    var v = parseFloat(input.value);
+    var pct = ((v - min) / (max - min)) * 100;
+    input.style.setProperty('--fill', pct + '%');
+  }
 
   /**
    * Bind the user's text color to the UI accent CSS variables so
@@ -1351,7 +1464,8 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
       'margin-bottom': Math.ceil(config.fontSize * 0.25) + 'px'
     });
 
-    $('label.font_size_label > span').text(config.fontSize);
+    $('label.font_size_label > span').first().text(config.fontSize);
+    paintRangeFill($elm.fontSize[0], 12, 100);
 
     if (save) {
       localStorage.setItem('teleprompter_font_size', config.fontSize);
@@ -1380,7 +1494,8 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
    */
   function updateSpeed(save, skipUpdate) {
     config.pageSpeed = $elm.speed.slider('value');
-    $('label.speed_label > span').text($elm.speed.slider('value'));
+    $('label.speed_label > span').first().text($elm.speed.slider('value'));
+    paintRangeFill($elm.speed[0], 0, 50);
     updateStats();
 
     if (save) {

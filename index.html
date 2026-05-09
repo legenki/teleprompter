@@ -36,13 +36,9 @@
     <link rel="canonical" href="https://legenki.github.io/teleprompter/" />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/redmond/jquery-ui.min.css" />
     <link rel="stylesheet" href="assets/css/style.v122.css">
     <link rel="stylesheet" href="assets/css/theme.css">
     <link rel="stylesheet" href="assets/css/font-awesome.min.css">
-
-    <!-- DNS Pre-Connects -->
-    <link rel="preconnect" href="https://code.jquery.com/" crossorigin />
 
     <!-- Preload Assets -->
     <link rel="preload" href="assets/font/fontawesome-webfont.woff?v=3.2.1" as="font" type="font/woff2" crossorigin>
@@ -124,13 +120,13 @@
         <div class="sliders">
           <label class="font_size_label" aria-label="Font Size">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-            <span>60</span>
-            <div class="font_size slider"></div>
+            <span id="font-size-value">60</span>
+            <input type="range" min="12" max="100" value="60" class="font_size slider" id="font-size-slider" aria-label="Font Size">
           </label>
           <label class="speed_label" aria-label="Page Speed">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4"></path><path d="m16.2 7.8 2.9-2.9"></path><path d="M18 12h4"></path><path d="m16.2 16.2 2.9 2.9"></path><circle cx="12" cy="14" r="8"></circle><path d="M12 14l3-3"></path></svg>
-            <span>35</span>
-            <div class="speed slider"></div>
+            <span id="speed-value">35</span>
+            <input type="range" min="0" max="50" value="35" class="speed slider" id="speed-slider" aria-label="Page Speed">
           </label>
         </div>
         <div class="buttons" role="group" aria-label="TelePrompter Controls">
@@ -217,7 +213,7 @@
         d.getElementsByTagName(s)[0].parentNode.insertBefore(js, d.getElementsByTagName(s)[0]);
       }(document, 'script', 'teleprompter-socket'));
     </script>
-    <script src="assets/js/plugins.v122.js"></script>
+    <script src="assets/js/plugins.slim.js"></script>
     <script src="assets/js/script.v122.js"></script>
 
     <script>

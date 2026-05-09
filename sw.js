@@ -1,5 +1,5 @@
 // Bump this on every release so old caches are invalidated.
-var CACHE_VERSION = 'v1.2.3-2026-05-09';
+var CACHE_VERSION = 'v1.3.0-2026-05-09';
 var CACHE_NAME = 'teleprompter:' + CACHE_VERSION;
 
 // Files we want available offline. They are still revalidated on every
@@ -11,8 +11,9 @@ var PRECACHE = [
   './assets/css/style.v122.css',
   './assets/css/theme.css',
   './assets/css/font-awesome.min.css',
-  './assets/js/plugins.v122.js',
+  './assets/js/plugins.slim.js',
   './assets/js/script.v122.js',
+  './assets/font/fontawesome-webfont.woff?v=3.2.1',
   './manifest.json'
 ];
 
