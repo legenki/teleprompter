@@ -61,16 +61,29 @@
     };
   };
 
-  // ---- $.fn.fadeIn / fadeOut — replace with CSS opacity transitions
+  // ---- $.fn.fadeIn / fadeOut — replace with CSS opacity transitions.
+  // Note: jQuery's fadeIn forces display:block (overriding stylesheet
+  // 'display:none'). We replicate that by using inline display + a
+  // value that wins over a base 'display:none' rule without !important.
   function fadeTo(els, target, duration, done) {
     duration = (duration === 'slow') ? 600 : (duration === 'fast' ? 200 : (duration | 0));
+    var fadingIn = target > 0;
     els.forEach(function(el) {
-      if (target === 1 && getComputedStyle(el).display === 'none') {
-        el.style.display = '';
+      if (fadingIn) {
+        // Force display so a base CSS 'display:none' doesn't keep it hidden.
+        var d = (el.tagName === 'SPAN' || el.tagName === 'A') ? 'inline' : 'block';
+        el.style.display = d;
+        // Start from 0 if the element was hidden, then transition up.
+        if (getComputedStyle(el).opacity === '0') {
+          el.style.opacity = '0';
+          // Force a reflow so the transition starts from 0.
+          // eslint-disable-next-line no-unused-expressions
+          el.offsetHeight;
+        }
       }
-      el.style.transition = 'opacity ' + duration + 'ms';
+      el.style.transition = duration > 0 ? 'opacity ' + duration + 'ms' : '';
       requestAnimationFrame(function() { el.style.opacity = target; });
-      if (target === 0) {
+      if (!fadingIn) {
         setTimeout(function() { el.style.display = 'none'; }, duration);
       }
     });
