@@ -260,7 +260,30 @@
       // Load Service Worker for PWA
       if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').then(function(reg) {
-          console.log('Successfully registered service worker', reg);
+          // Force a check for an updated worker on every page load,
+          // so a new deploy is picked up without manual cache clear.
+          reg.update();
+
+          // When a new SW takes control, hard-reload once so the user
+          // sees the freshly cached HTML/CSS/JS instead of stale ones.
+          var refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+
+          // If a new SW is waiting, tell it to take over immediately.
+          if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          reg.addEventListener('updatefound', function() {
+            var nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener('statechange', function() {
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                nw.postMessage({ type: 'SKIP_WAITING' });
+              }
+            });
+          });
         }).catch(function(err) {
           console.warn('Error whilst registering service worker', err);
         });
