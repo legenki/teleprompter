@@ -866,133 +866,12 @@ var TelePrompter = (function() {
     applySurfaceColor(config.backgroundColor);
   }
 
-  /**
-   * Parse a CSS color (#rgb, #rrggbb, rgb(...)) to an [r,g,b] array.
-   * Returns null if it can't be parsed.
-   */
-  function parseColor(input) {
-    if (!input) return null;
-    var s = String(input).trim();
-    if (s.charAt(0) === '#') {
-      if (s.length === 4) {
-        return [parseInt(s[1] + s[1], 16),
-                parseInt(s[2] + s[2], 16),
-                parseInt(s[3] + s[3], 16)];
-      }
-      if (s.length === 7) {
-        return [parseInt(s.slice(1, 3), 16),
-                parseInt(s.slice(3, 5), 16),
-                parseInt(s.slice(5, 7), 16)];
-      }
-    }
-    var m = s.match(/^rgba?\(([^)]+)\)$/i);
-    if (m) {
-      var parts = m[1].split(',').map(function(x){ return parseFloat(x); });
-      return [parts[0]|0, parts[1]|0, parts[2]|0];
-    }
-    return null;
-  }
-
-  /**
-   * Lighten an [r,g,b] color toward white by a given amount (0..1).
-   */
-  function lightenRGB(rgb, amount) {
-    return [
-      Math.min(255, Math.round(rgb[0] + (255 - rgb[0]) * amount)),
-      Math.min(255, Math.round(rgb[1] + (255 - rgb[1]) * amount)),
-      Math.min(255, Math.round(rgb[2] + (255 - rgb[2]) * amount))
-    ];
-  }
-
-  /**
-   * Darken an [r,g,b] color toward black by a given amount (0..1).
-   */
-  function darkenRGB(rgb, amount) {
-    return [
-      Math.max(0, Math.round(rgb[0] * (1 - amount))),
-      Math.max(0, Math.round(rgb[1] * (1 - amount))),
-      Math.max(0, Math.round(rgb[2] * (1 - amount)))
-    ];
-  }
-
-  /**
-   * Relative luminance of an [r,g,b] color (WCAG-style, 0..1).
-   */
-  function luminance(rgb) {
-    var srgb = rgb.map(function(c){
-      var v = c / 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
-    return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
-  }
-
-  function rgbStr(rgb) { return rgb[0] + ', ' + rgb[1] + ', ' + rgb[2]; }
-  function rgbCSS(rgb) { return 'rgb(' + rgbStr(rgb) + ')'; }
-
-  /**
-   * Paint the filled portion of a native <input type="range"> via the
-   * --fill CSS variable used by the WebKit gradient track. Firefox
-   * uses ::-moz-range-progress automatically and ignores --fill.
-   */
+  // Color helpers live in assets/js/colors.js, exposed as window.TPColors.
+  // These thin wrappers keep the existing call sites untouched.
+  function applyAccentColor(color) { return TPColors.applyAccent(color); }
+  function applySurfaceColor(color) { return TPColors.applySurface(color); }
   function paintRangeFill(input, min, max) {
-    if (!input) return;
-    var v = parseFloat(input.value);
-    var pct = ((v - min) / (max - min)) * 100;
-    input.style.setProperty('--fill', pct + '%');
-  }
-
-  /**
-   * Bind the user's text color to the UI accent CSS variables so
-   * the logo, sliders, play button, focus rings, hover states etc.
-   * follow the prompter text color.
-   */
-  function applyAccentColor(color) {
-    var rgb = parseColor(color);
-    if (!rgb) return;
-    var hover = lightenRGB(rgb, 0.18);
-    var root = document.documentElement.style;
-    root.setProperty('--tp-ui-accent',        rgbCSS(rgb));
-    root.setProperty('--tp-ui-accent-hover',  rgbCSS(hover));
-    root.setProperty('--tp-ui-accent-soft',   'rgba(' + rgbStr(rgb) + ', .15)');
-    root.setProperty('--tp-ui-accent-rgb',    rgbStr(rgb));
-  }
-
-  /**
-   * Bind the user's background color to the UI surface variables.
-   * Generates a coherent multi-step palette from one base color:
-   *   --tp-ui-bg / --tp-ui-surface : the base (header / page bg)
-   *   --tp-ui-surface2             : header / drafts header (one step lighter)
-   *   --tp-ui-surface3             : hover bg (two steps lighter)
-   *   --tp-ui-border               : subtle separator
-   *   --tp-ui-text                 : auto-contrast (warm parchment for
-   *                                  dark bg, deep espresso for light bg)
-   *   --tp-ui-muted                : 60% alpha of text
-   */
-  function applySurfaceColor(color) {
-    var rgb = parseColor(color);
-    if (!rgb) return;
-
-    var lum = luminance(rgb);
-    var isDark = lum < 0.5;
-
-    // Step direction: dark bg → lighten; light bg → darken
-    var step = isDark ? lightenRGB : darkenRGB;
-    var surface2 = step(rgb, 0.10);
-    var surface3 = step(rgb, 0.18);
-    var border   = step(rgb, 0.25);
-
-    // Auto-contrasting text/muted colors
-    var textRGB  = isDark ? [244, 234, 216] : [31, 22, 16];
-    var mutedRGB = isDark ? [184, 168, 146] : [80, 64, 48];
-
-    var root = document.documentElement.style;
-    root.setProperty('--tp-ui-bg',       rgbCSS(rgb));
-    root.setProperty('--tp-ui-surface',  rgbCSS(rgb));
-    root.setProperty('--tp-ui-surface2', rgbCSS(surface2));
-    root.setProperty('--tp-ui-surface3', rgbCSS(surface3));
-    root.setProperty('--tp-ui-border',   rgbCSS(border));
-    root.setProperty('--tp-ui-text',     rgbCSS(textRGB));
-    root.setProperty('--tp-ui-muted',    rgbCSS(mutedRGB));
+    return TPColors.paintRangeFill(input, min, max);
   }
 
   /**
@@ -1364,7 +1243,7 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
 
       var maxScrollStop = (scrollHeight - clientHeight);
       var percent = parseInt(config.pageScrollPercent) / 100;
-      var newScrollTop = maxScrollStop * percent
+      var newScrollTop = maxScrollStop * percent;
 
       $elm.article.stop().animate({
         scrollTop: newScrollTop + 'px'
@@ -1800,5 +1679,5 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
       handleFlipY();
       return this;
     }
-  }
+  };
 })();

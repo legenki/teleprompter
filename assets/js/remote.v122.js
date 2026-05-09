@@ -28,14 +28,14 @@
 
   /* Default App Settings */
   var defaultConfig = {
-	  backgroundColor: '#141414',
+    backgroundColor: '#1f1610',
     dimControls: true,
     flipX: false,
     flipY: false,
     fontSize: 60,
     pageSpeed: 35,
     pageScrollPercent: 0,
-    textColor: '#ffffff'
+    textColor: '#b3b33b'
   };
 
   /* Custom App Settings */
@@ -188,7 +188,7 @@
       if (socket && remote) {
         timeout = setTimeout(function(){
           socket.emit('sendRemoteControl', 'updateConfig', config);
-        }, 100)
+        }, 100);
       }
     });
 
@@ -545,5 +545,5 @@
   /* Expose Init to Public TelePrompterRemote Object */
   return {
     init: init
-  }
+  };
 })();

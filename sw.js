@@ -12,6 +12,7 @@ var PRECACHE = [
   './assets/css/theme.css',
   './assets/css/font-awesome.min.css',
   './assets/js/plugins.slim.js',
+  './assets/js/colors.js',
   './assets/js/script.v122.js',
   './assets/font/fontawesome-webfont.woff?v=3.2.1',
   './manifest.json'
