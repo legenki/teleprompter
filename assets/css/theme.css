@@ -18,7 +18,7 @@
   --tp-ui-danger: #d97443;
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
   --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  --tp-prompter-font: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --tp-prompter-font: Georgia, 'Times New Roman', serif;
 }
 
 /* === LAYOUT FIXES === */
@@ -664,9 +664,10 @@ select:focus-visible,
   pointer-events: none;
 }
 .countdown-num {
+  font-family: var(--tp-prompter-font);
   font-size: 200px;
   font-weight: 700;
-  color: #fff;
+  color: var(--tp-ui-accent);
   font-variant-numeric: tabular-nums;
   text-shadow: 0 4px 32px rgba(0, 0, 0, .5);
 }
@@ -751,7 +752,6 @@ select:focus-visible,
 article .teleprompter,
 article .teleprompter p {
   font-family: var(--tp-prompter-font);
-  font-optical-sizing: auto;
   letter-spacing: 0;
 }
 
