@@ -17,8 +17,12 @@
   --tp-ui-success: #93b03b;
   --tp-ui-danger: #d97443;
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
-  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
-  --tp-prompter-font: Georgia, 'Times New Roman', serif;
+  /* System UI sans (matches OS chrome on every platform — no webfont). */
+  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                'Helvetica Neue', Arial, sans-serif;
+  /* System serif for prompter / countdown (Georgia is bundled on every
+     mainstream OS and renders identically without a network fetch). */
+  --tp-prompter-font: Georgia, 'Times New Roman', Cambria, serif;
 }
 
 /* === LAYOUT FIXES === */
