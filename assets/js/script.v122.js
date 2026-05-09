@@ -25,7 +25,6 @@ var TelePrompter = (function() {
     timeout,
     timer,
     timerExp = 10,
-    timerGA,
     timerURL,
     version = 'v1.2.2';
 
@@ -66,8 +65,6 @@ var TelePrompter = (function() {
     $elm.buttonReset = $('.button.reset');
     $elm.closeModal = $('.close-modal');
     $elm.fontSize = $('.font_size');
-    $elm.gaInput = $('input[data-ga], textarea[data-ga], select[data-ga]');
-    $elm.gaLinks = $('a[data-ga], button[data-ga]');
     $elm.header = $('header');
     $elm.headerContent = $('header h1, header nav');
     $elm.markerOverlay = $('.marker, .overlay');
@@ -90,8 +87,6 @@ var TelePrompter = (function() {
     $elm.buttonRemote.on('click.teleprompter', handleRemote);
     $elm.buttonReset.on('click.teleprompter', handleReset);
     $elm.closeModal.on('click.teleprompter', handleCloseModal);
-    $elm.gaInput.on('change.teleprompter', gaInput);
-    $elm.gaLinks.on('click.teleprompter', gaLinks);
     $elm.textColor.on('change.teleprompter', handleTextColor);
 
     // Listen for Key Presses
@@ -167,9 +162,6 @@ var TelePrompter = (function() {
       console.log('[TP]', 'Remote Initialized', currentRemote ? '( Remote ID: ' + currentRemote + ' )' : '( No Remote )');
     }
 
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){}, timerExp);
-    gaEvent('TP', 'Remote Initialized', currentRemote ? currentRemote : 'No Remote');
   }
 
   /**
@@ -307,9 +299,6 @@ var TelePrompter = (function() {
       console.log('[TP]', 'Settings Initialized', urlParams ? urlParams : '( No URL Params )');
     }
 
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){}, timerExp);
-    gaEvent('TP', 'Settings Initialized', urlParams ? 'Custom URL Params' : 'No URL Params');
   }
 
   /**
@@ -425,63 +414,6 @@ var TelePrompter = (function() {
   }
 
   /**
-   * Setup Events using Google Analytics
-   * @param category
-   * @param action
-   * @param label
-   * @param value
-   */
-   function gaEvent(category, action, label, value) {
-    if (typeof gtag !== 'undefined') {
-      gtag('event', action, {
-        event_category: category,
-        event_label: label,
-        value: value
-      });
-    }
-
-    if (debug) {
-      console.log('[GA]', category, action, label, value);
-    }
-  }
-
-  /**
-   * Setup Google Analytics on Links
-   * @param event
-   */
-  function gaLinks(event){
-    var data;
-
-    if (typeof event.target !== 'undefined' && typeof event.target.dataset !== 'undefined' && typeof event.target.dataset.ga !== 'undefined') {
-      data = event.target.dataset;
-    } else if (typeof event.target !== 'undefined' && typeof event.target.parentNode !== 'undefined' && typeof event.target.parentNode.dataset !== 'undefined' && typeof event.target.parentNode.dataset.track !== 'undefined') {
-      data = event.target.parentNode.dataset;
-    }
-
-    if (typeof data === 'object' && typeof data.category === 'string' && typeof data.action === 'string' && typeof data.label === 'string') {
-      gaEvent(data.category, data.action, data.label, data.value);
-    }
-  }
-
-  /**
-   * Setup Google Analytics on Input
-   * @param event
-   */
-  function gaInput(event){
-    var data;
-
-    if (typeof event.target !== 'undefined' && typeof event.target.dataset !== 'undefined' && typeof event.target.dataset.ga !== 'undefined') {
-      data = event.target.dataset;
-    } else if (typeof event.target !== 'undefined' && typeof event.target.parentNode !== 'undefined' && typeof event.target.parentNode.dataset !== 'undefined' && typeof event.target.parentNode.dataset.track !== 'undefined') {
-      data = event.target.parentNode.dataset;
-    }
-
-    if (typeof data === 'object' && typeof data.category === 'string' && typeof data.action === 'string') {
-      gaEvent(data.category, data.action, event.target.value, event.target.value.length);
-    }
-  }
-
-  /**
    * Get App Config
    * @param {String} key
    * @returns Object
@@ -533,10 +465,6 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Background Color Changed:', config.backgroundColor);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){}, timerExp);
-    gaEvent('TP', 'Background Color Changed', config.backgroundColor);
 
     // Update URL Params
     clearTimeout(timerURL);
@@ -594,13 +522,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Dim Control Changed:', config.dimControls);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Dim Control Changed', config.dimControls);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
   }
@@ -648,13 +570,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Flip X Changed:', config.flipX);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Flip X Changed', config.flipX);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
     updateURL();
@@ -717,13 +633,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Flip Y Changed:', config.flipY);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Flip Y Changed', config.flipY);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
     updateURL();
@@ -751,13 +661,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Text Color Changed:', config.textColor);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Text Color Changed', config.textColor);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
     updateURL();
@@ -1226,12 +1130,7 @@ var TelePrompter = (function() {
       if (debug) {
         console.log('[IO]', 'Socket Connected');
       }
-
-      clearTimeout(timerGA);
-      timerGA = setTimeout(function(){
-        gaEvent('IO', 'Socket Connected');
-      }, timerExp);
-    });
+});
 
     socket.on('disconnect', function() {
       $elm.buttonRemote.removeClass('active');
@@ -1240,12 +1139,7 @@ var TelePrompter = (function() {
       if (debug) {
         console.log('[IO]', 'Socket Disconnected');
       }
-
-      clearTimeout(timerGA);
-      timerGA = setTimeout(function(){
-        gaEvent('IO', 'Socket Disconnected');
-      }, timerExp);
-    });
+});
 
     socket.on('connectedToRemote', function() {
       localStorage.setItem('teleprompter_remote_id', remote);
@@ -1259,24 +1153,13 @@ var TelePrompter = (function() {
       if (debug) {
         console.log('[IO]', 'Remote Connected:', remote);
       }
-
-      clearTimeout(timerGA);
-      timerGA = setTimeout(function(){
-        gaEvent('IO', 'Remote Connected', remote);
-      }, timerExp);
-    });
+});
 
     socket.on('remoteControl', function(command, value) {
       if (debug) {
         console.log('[TP]', 'remoteControl', command, value);
       }
-
-      clearTimeout(timerGA);
-      timerGA = setTimeout(function(){
-        gaEvent('IO', 'Remote Control', command);
-      }, timerExp);
-
-      switch (command) {
+switch (command) {
         case 'reset':
           handleReset();
           break;
@@ -1322,12 +1205,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[IO]', 'Remote Disconnected');
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('IO', 'Remote Disconnected');
-    }, timerExp);
-  }
+}
 
   /**
    * Handle Updates from Remote
@@ -1340,13 +1218,7 @@ var TelePrompter = (function() {
       console.log('[IO]', 'Old Config:', oldConfig);
       console.log('[IO]', 'New Config:', newConfig);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('IO', 'Remote Update');
-    }, timerExp);
-
-    if (oldConfig.dimControls !== newConfig.dimControls) {
+if (oldConfig.dimControls !== newConfig.dimControls) {
       handleDim(null, true);
     }
 
@@ -1425,12 +1297,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Starting TelePrompter');
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Starting TelePrompter');
-    }, timerExp);
-  }
+}
 
   /**
    * Stop Teleprompter
@@ -1463,12 +1330,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Stopping TelePrompter');
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Stopping TelePrompter');
-    }, timerExp);
-  }
+}
 
   /**
    * Manage Font Size Change
@@ -1505,13 +1367,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Font Size Changed:', config.fontSize);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Font Size Changed', config.fontSize);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
     updateURL();
@@ -1541,13 +1397,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'Page Speed Changed:', config.pageSpeed);
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'Page Speed Changed', config.pageSpeed);
-    }, timerExp);
-
-    // Update URL Params
+// Update URL Params
     clearTimeout(timerURL);
     timerURL = setTimeout(updateURL, timerExp);
     updateURL();
@@ -1573,12 +1423,7 @@ var TelePrompter = (function() {
     if (debug) {
       console.log('[TP]', 'TelePrompter Text Updated');
     }
-
-    clearTimeout(timerGA);
-    timerGA = setTimeout(function(){
-      gaEvent('TP', 'TelePrompter Text Updated');
-    }, timerExp);
-  }
+}
 
   /**
    * Count words in current teleprompter text and estimate reading time.

@@ -14,49 +14,26 @@
     <meta name="theme-color" content="#1f1610" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover" />
 
-    <!-- Default Meta Tags -->
-    <meta name="description" content="Browser-based TelePrompter with Remote Control">
-    <meta name="keywords" content="TelePrompter, Remote, Browser, Open Source">
-    <meta name="cache-control" content="public">
-    <meta name="company" content="Fatal Encounters">
-    <meta name="googlebot" content="index,follow">
-    <meta name="robots" content="noodp,noydir">
+    <!-- SEO -->
+    <meta name="description" content="Browser-based teleprompter with remote control. No install, no sign-up.">
     <meta name="robots" content="index,follow">
-    <meta name="author" content="Peter Schmalfeldt">
 
-    <!-- Twitter META Info -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:site" content="@mrmidi">
-    <meta property="twitter:title" content="TelePrompter">
-    <meta property="twitter:description" content="Browser-based TelePrompter with Remote Control">
-    <meta property="twitter:creator" content="@mrmidi">
-    <meta property="twitter:image:src" content="https://promptr.tv/assets/img/social-card.png">
-    <meta property="twitter:domain" content="promptr.tv">
-
-    <!-- Open Graph protocol -->
-    <meta property="og:locale" content="en_US">
+    <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="TelePrompter">
-    <meta property="og:url" content="https://promptr.tv">
-    <meta property="og:image" content="https://promptr.tv/assets/img/social-card.png">
-    <meta property="og:site_name" content="TelePrompter">
-    <meta property="og:description" content="Browser-based TelePrompter with Remote Control">
+    <meta property="og:url" content="https://legenki.github.io/teleprompter/">
+    <meta property="og:image" content="https://legenki.github.io/teleprompter/assets/img/social-card.png">
+    <meta property="og:description" content="Browser-based teleprompter with remote control.">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="TelePrompter">
+    <meta property="twitter:description" content="Browser-based teleprompter with remote control.">
+    <meta property="twitter:image" content="https://legenki.github.io/teleprompter/assets/img/social-card.png">
 
-    <!-- Dublin Core Metadata -->
-    <meta name="dc:language" content="en_US">
-    <meta name="dc:title" content="TelePrompter">
-    <meta name="dc:source" content="https://promptr.tv">
-    <meta name="dc:description" content="Browser-based TelePrompter with Remote Control">
-
-    <!-- Manifest -->
+    <!-- Manifest / icons -->
     <link rel="manifest" href="manifest.json" />
-
-    <!-- Icons -->
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/img/apple/icon-192x192.png" />
-
-    <!-- Canonical -->
-    <link rel="canonical" href="https://promptr.tv" />
+    <link rel="canonical" href="https://legenki.github.io/teleprompter/" />
 
     <!-- Styles -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/redmond/jquery-ui.min.css" />
@@ -101,14 +78,14 @@
     </div>
 
     <div id="modal">
-      <a class="button icon-remove-circle close-modal" href="javascript:void(0)" role="button" aria-label="Close Modal" title="Close Modal" data-ga data-category="Nav" data-action="Modal" data-label="Close Modal"></a>
+      <a class="button icon-remove-circle close-modal" href="javascript:void(0)" role="button" aria-label="Close Modal" title="Close Modal"></a>
 
       <div class="modal-content">
         <!-- Remote Control -->
         <div id="remote-control-modal">
           <h1>Remote Control</h1>
           <p>Access the Following URL from another device:</p>
-          <p class="remote-url">https://promptr.tv/remote</p>
+          <p class="remote-url"></p>
           <p>Enter this Remote ID:</p>
           <p class="remote-id"></p>
           <div id="qr-code"></div>
@@ -119,7 +96,7 @@
         <div id="software-update">
           <h1>Software Update</h1>
           <p>Thanks for using <strong>TelePrompter</strong>. We just wanted to let you know that we have updated our site since the last time you visited.</p>
-          <a href="https://github.com/manifestinteractive/teleprompter/releases/latest" target="_blank" rel="nofollow noopener" data-ga data-category="Nav" data-action="Software Update" data-label="See Updates">See Updates</a>
+          <a href="https://github.com/legenki/teleprompter/releases/latest" target="_blank" rel="nofollow noopener">See Updates</a>
         </div>
       </div>
       <div class="modal-overlay"></div>
@@ -160,23 +137,23 @@
           <button class="theme-toggle" id="drafts-toggle" aria-label="Drafts" title="Saved Scripts" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
           </button>
-          <button class="button small btn-remote remote" aria-label="Remote Control" title="Remote Control" data-ga data-category="Nav" data-action="Control" data-label="Remote">
+          <button class="button small btn-remote remote" aria-label="Remote Control" title="Remote Control">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"></rect><circle cx="12" cy="7" r="1.2" fill="currentColor"></circle><line x1="9" y1="11" x2="15" y2="11"></line><line x1="9" y1="14" x2="15" y2="14"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
           </button>
-          <button class="button small btn-dim dim-controls" aria-label="Reading Focus" title="Reading Focus (dim edges, highlight current line)" data-ga data-category="Nav" data-action="Control" data-label="Dim">
+          <button class="button small btn-dim dim-controls" aria-label="Reading Focus" title="Reading Focus (dim edges, highlight current line)">
             <svg class="dim-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
             <svg class="dim-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="3" x2="12" y2="21" stroke-dasharray="2 3"></line></svg>
           </button>
-          <button class="button small btn-reset reset" aria-label="Reset TelePrompter" title="Reset TelePrompter" data-ga data-category="Nav" data-action="Control" data-label="Reset">
+          <button class="button small btn-reset reset" aria-label="Reset TelePrompter" title="Reset TelePrompter">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
           </button>
-          <button class="button small btn-flipx flip-x" aria-label="Flip Text Horizontally" title="Flip Text Horizontally" data-ga data-category="Nav" data-action="Control" data-label="FlipX">
+          <button class="button small btn-flipx flip-x" aria-label="Flip Text Horizontally" title="Flip Text Horizontally">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"></path><path d="M16 7l4 5-4 5"></path><path d="M8 7l-4 5 4 5"></path></svg>
           </button>
-          <button class="button small btn-flipy flip-y" aria-label="Flip Text Vertically" title="Flip Text Vertically" data-ga data-category="Nav" data-action="Control" data-label="FlipY">
+          <button class="button small btn-flipy flip-y" aria-label="Flip Text Vertically" title="Flip Text Vertically">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"></path><path d="M7 8L12 4l5 4"></path><path d="M7 16l5 4 5-4"></path></svg>
           </button>
-          <button class="button btn-play icon-play play active" aria-label="Play / Pause" title="Play / Pause TelePrompter" data-ga data-category="Nav" data-action="Control" data-label="Play">
+          <button class="button btn-play icon-play play active" aria-label="Play / Pause" title="Play / Pause TelePrompter">
             <svg class="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
             <svg class="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
           </button>
@@ -218,41 +195,28 @@
         Microsoft Word document, we'll do some cleaning up to make the breaks flow more easily.
         <br><br>
         Thanks for stopping by.
-        <br><br>
-        Love this TelePrompter?
-        <br><br>
-        <a href="https://github.com/manifestinteractive/teleprompter#project-support" contenteditable="false" class="sponsor-project" target="_blank" title="Support TelePrompter" aria-label="Support TelePrompter" data-ga data-category="Nav" data-action="Help" data-label="Support TelePrompter">
-          Support Our Work :)
-        </a><br><br>
-        Thanks !!!
       </div>
     </article>
 
     <script>
+      // Load Socket.IO client only when a same-origin server is reachable
+      // (i.e. when running via `npm run server`). On static hosts like
+      // GitHub Pages this 404s gracefully and the Remote button is hidden.
       (function(d, s, id) {
-        var js, tjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) { return; }
-        js = d.createElement(s);
+        if (d.getElementById(id)) return;
+        var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+        var port = window.location.port ? ':' + window.location.port : '';
+        var src = protocol + '//' + window.location.hostname + port + '/socket.io/socket.io.js';
+        var js = d.createElement(s);
         js.id = id;
-        js.src = (window.location.hostname === 'promptr.tv')
-          ? 'https://promptr.tv/remote/socket.io/socket.io.js'
-          : 'http://' + window.location.hostname + ':3000/socket.io/socket.io.js';
-        tjs.parentNode.insertBefore(js, tjs);
+        js.src = src;
+        js.onerror = function() {
+          var btn = document.querySelector('.button.remote');
+          if (btn) btn.style.display = 'none';
+        };
+        d.getElementsByTagName(s)[0].parentNode.insertBefore(js, d.getElementsByTagName(s)[0]);
       }(document, 'script', 'teleprompter-socket'));
     </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-S1R98WW400"></script>
-
-    <script>
-      window['ga-disable-G-S1R98WW400'] = (window.location.hostname !== 'promptr.tv');
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', 'G-S1R98WW400', {
-        'anonymize_ip': true,
-        'allow_google_signals': false
-      });
-    </script>
-
     <script src="assets/js/plugins.v122.js"></script>
     <script src="assets/js/script.v122.js"></script>
 
