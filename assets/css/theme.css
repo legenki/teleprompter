@@ -65,7 +65,7 @@ article .teleprompter {
 header {
   height: 56px !important;
   background: var(--tp-ui-surface2) !important;
-  border-bottom: 1px solid var(--tp-ui-border) !important;
+  border-bottom: none !important;
   display: flex !important;
   align-items: center;
   padding: 0 16px;
