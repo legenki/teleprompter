@@ -216,31 +216,6 @@ article .teleprompter.flip-xy {
   overflow: visible;
 }
 
-.overlay .top {
-  position: fixed;
-  top: 64px;
-  left: 0;
-  right: 0;
-  height: 100px;
-  width: 100%;
-  background-color: #000;
-  background-color: rgba(0, 0, 0, 0.75);
-  z-index: 10;
-}
-
-.overlay .bottom {
-  position: fixed;
-  top: 300px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  background-color: #000;
-  background-color: rgba(0, 0, 0, 0.75);
-  overflow: hidden;
-  z-index: 10;
-}
-
 input[type="color"] {
   appearance: none;
   width: 44px;
@@ -351,25 +326,6 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 8px;
 }
 
-#get-help {
-  color: #999;
-  top: 0;
-  left: 10px;
-  position: absolute;
-  z-index: 100;
-  width: 60px;
-  height: 60px;
-  display: block;
-  line-height: 60px;
-  text-decoration: none;
-  text-align: center;
-  font-size: 40px;
-  transition: color 0.25s;
-}
-#get-help:hover, #get-help:focus {
-  color: #FFF;
-}
-
 a.sponsor-project {
   cursor: pointer;
   pointer-events: all;
@@ -412,22 +368,15 @@ a.sponsor-project:hover, a.sponsor-project:focus {
     top: 130px;
   }
 
-  .overlay .top {
-    top: 130px;
-    height: 60px;
-  }
+  
 
-  .overlay .bottom {
-    top: 280px;
-  }
+  
 
   .buttons {
     margin-right: 0 !important;
   }
 
-  #get-help {
-    left: 0;
-  }
+  
 }
 
 @media only screen and (max-width: 600px) {
@@ -516,22 +465,11 @@ a.sponsor-project:hover, a.sponsor-project:focus {
     top: 100px;
   }
 
-  .overlay .top {
-    top: 100px;
-    height: 60px;
-  }
+  
 
-  .overlay .bottom {
-    top: 230px;
-  }
+  
 
-  #get-help {
-    left: 0;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    font-size: 30px;
-  }
+  
 }
 
 @media only screen and (min-width: 376px) and (max-width: 420px) {
@@ -572,9 +510,7 @@ a.sponsor-project:hover, a.sponsor-project:focus {
     display: unset;
   }
 
-  #get-help {
-    left: 40px;
-  }
+  
 }
 
 @media only screen and (max-width: 320px) {

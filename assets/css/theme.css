@@ -440,34 +440,8 @@ article .teleprompter p:last-child {
   background: rgba(31, 22, 16, .9) !important;
 }
 
-/* jQuery UI redmond ships its own blue palette — neutralise it.
-   The .ui-state-* classes color the slider track + handle on hover/focus. */
-.ui-state-default,
-.ui-widget-content .ui-state-default,
-.ui-widget-header .ui-state-default,
-.ui-state-hover,
-.ui-widget-content .ui-state-hover,
-.ui-widget-header .ui-state-hover,
-.ui-state-focus,
-.ui-widget-content .ui-state-focus,
-.ui-widget-header .ui-state-focus,
-.ui-state-active,
-.ui-widget-content .ui-state-active,
-.ui-widget-header .ui-state-active {
-  border-color: var(--tp-ui-accent) !important;
-  background: var(--tp-ui-accent) !important;
-  color: var(--tp-ui-bg) !important;
-  font-weight: inherit !important;
-}
-
-/* Slider track and range — accent with alpha for the unfilled track */
-.ui-widget.ui-widget-content {
-  background: rgba(var(--tp-ui-accent-rgb), .18) !important;
-  border-color: rgba(var(--tp-ui-accent-rgb), .25) !important;
-}
-.ui-widget-header {
-  background: var(--tp-ui-accent) !important;
-}
+/* (jQuery UI redmond removed — slider styling is now handled by the
+   .sliders input[type="range"] block above.) */
 
 /* contenteditable selection inside the prompter — accent tint */
 ::selection {
