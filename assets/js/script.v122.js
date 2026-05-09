@@ -735,6 +735,9 @@ var TelePrompter = (function() {
     $elm.teleprompter.css('color', config.textColor);
     localStorage.setItem('teleprompter_text_color', config.textColor);
 
+    // Update the UI accent (logo, sliders, play, hover, focus, etc.)
+    applyAccentColor(config.textColor);
+
     if (socket && remote) {
       clearTimeout(emitTimeout);
       emitTimeout = setTimeout(function(){
@@ -851,6 +854,67 @@ var TelePrompter = (function() {
       }
       try { localStorage.setItem('teleprompter_text_color', prompterText); } catch (e) {}
     }
+
+    // Bind UI accent to the resolved prompter text color
+    applyAccentColor(config.textColor);
+  }
+
+  /**
+   * Parse a CSS color (#rgb, #rrggbb, rgb(...)) to an [r,g,b] array.
+   * Returns null if it can't be parsed.
+   */
+  function parseColor(input) {
+    if (!input) return null;
+    var s = String(input).trim();
+    if (s.charAt(0) === '#') {
+      if (s.length === 4) {
+        return [parseInt(s[1] + s[1], 16),
+                parseInt(s[2] + s[2], 16),
+                parseInt(s[3] + s[3], 16)];
+      }
+      if (s.length === 7) {
+        return [parseInt(s.slice(1, 3), 16),
+                parseInt(s.slice(3, 5), 16),
+                parseInt(s.slice(5, 7), 16)];
+      }
+    }
+    var m = s.match(/^rgba?\(([^)]+)\)$/i);
+    if (m) {
+      var parts = m[1].split(',').map(function(x){ return parseFloat(x); });
+      return [parts[0]|0, parts[1]|0, parts[2]|0];
+    }
+    return null;
+  }
+
+  /**
+   * Lighten an [r,g,b] color toward white by a given amount (0..1).
+   */
+  function lightenRGB(rgb, amount) {
+    return [
+      Math.min(255, Math.round(rgb[0] + (255 - rgb[0]) * amount)),
+      Math.min(255, Math.round(rgb[1] + (255 - rgb[1]) * amount)),
+      Math.min(255, Math.round(rgb[2] + (255 - rgb[2]) * amount))
+    ];
+  }
+
+  /**
+   * Bind the user's text color to the UI accent CSS variables so
+   * the logo, sliders, play button, focus rings, hover states etc.
+   * follow the prompter text color.
+   */
+  function applyAccentColor(color) {
+    var rgb = parseColor(color);
+    if (!rgb) return;
+
+    var hover = lightenRGB(rgb, 0.18);
+    var rgbStr  = rgb[0]   + ', ' + rgb[1]   + ', ' + rgb[2];
+    var hoverStr = hover[0] + ', ' + hover[1] + ', ' + hover[2];
+
+    var root = document.documentElement.style;
+    root.setProperty('--tp-ui-accent',        'rgb('  + rgbStr   + ')');
+    root.setProperty('--tp-ui-accent-hover',  'rgb('  + hoverStr + ')');
+    root.setProperty('--tp-ui-accent-soft',   'rgba(' + rgbStr   + ', .15)');
+    root.setProperty('--tp-ui-accent-rgb',    rgbStr);
   }
 
   /**

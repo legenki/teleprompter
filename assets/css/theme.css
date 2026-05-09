@@ -12,7 +12,8 @@
   --tp-ui-muted: #b8a892;
   --tp-ui-accent: #b3b33b;
   --tp-ui-accent-hover: #cdcd55;
-  --tp-ui-accent-soft: rgba(179, 179, 59, .15);
+  --tp-ui-accent-rgb: 179, 179, 59;
+  --tp-ui-accent-soft: rgba(var(--tp-ui-accent-rgb), .15);
   --tp-ui-success: #93b03b;
   --tp-ui-danger: #d97443;
   --tp-ui-shadow: 0 0 transparent, 0 0 transparent;
@@ -438,20 +439,20 @@ article .teleprompter p:last-child {
 
 /* Slider track and range — accent with alpha for the unfilled track */
 .ui-widget.ui-widget-content {
-  background: rgba(179, 179, 59, .18) !important;
-  border-color: rgba(179, 179, 59, .25) !important;
+  background: rgba(var(--tp-ui-accent-rgb), .18) !important;
+  border-color: rgba(var(--tp-ui-accent-rgb), .25) !important;
 }
 .ui-widget-header {
   background: var(--tp-ui-accent) !important;
 }
 
-/* contenteditable selection inside the prompter — olive tint */
+/* contenteditable selection inside the prompter — accent tint */
 ::selection {
-  background: rgba(179, 179, 59, .35);
+  background: rgba(var(--tp-ui-accent-rgb), .35);
   color: inherit;
 }
 ::-moz-selection {
-  background: rgba(179, 179, 59, .35);
+  background: rgba(var(--tp-ui-accent-rgb), .35);
   color: inherit;
 }
 
