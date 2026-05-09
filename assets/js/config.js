@@ -6,7 +6,7 @@
 (function (root) {
   'use strict';
 
-  var DEFAULTS = {
+  const DEFAULTS = {
     backgroundColor:    '#1f1610',
     dimControls:        true,
     flipX:              false,
@@ -19,7 +19,7 @@
 
   // localStorage key map. Useful so we don't sprinkle string literals
   // across the codebase.
-  var KEYS = {
+  const KEYS = {
     text:            'teleprompter_text',
     version:         'teleprompter_version',
     remoteId:        'teleprompter_remote_id',
@@ -37,7 +37,7 @@
 
   function safeGet(key, fallback) {
     try {
-      var v = localStorage.getItem(key);
+      const v = localStorage.getItem(key);
       return v === null ? fallback : v;
     } catch (e) { return fallback; }
   }
@@ -50,21 +50,21 @@
   }
 
   // Typed wrappers around the string-only localStorage API.
-  var Store = {
-    getString: function (key, fallback) { return safeGet(key, fallback); },
-    getBool:   function (key, fallback) {
-      var v = safeGet(key, null);
+  const Store = {
+    getString(key, fallback) { return safeGet(key, fallback); },
+    getBool(key, fallback) {
+      const v = safeGet(key, null);
       if (v === null) return fallback;
       return v === 'true' || v === '1';
     },
-    getInt:    function (key, fallback) {
-      var v = safeGet(key, null);
+    getInt(key, fallback) {
+      const v = safeGet(key, null);
       if (v === null) return fallback;
-      var n = parseInt(v, 10);
+      const n = parseInt(v, 10);
       return isNaN(n) ? fallback : n;
     },
-    set:       function (key, value) { return safeSet(key, value); },
-    remove:    safeRemove
+    set(key, value)  { return safeSet(key, value); },
+    remove: safeRemove
   };
 
   root.TPConfig = {

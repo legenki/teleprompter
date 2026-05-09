@@ -9,6 +9,7 @@
   },
   "globals": {
     "TPColors": "readonly",
+    "TPConfig": "readonly",
     "TelePrompter": "writable",
     "TelePrompterRemote": "writable",
     "QRCode": "readonly",
@@ -31,7 +32,7 @@
   "ignorePatterns": [
     "node_modules/",
     "assets/css/",
-    "assets/js/plugins.slim.js",
+    "assets/js/vendor.js",
     "assets/css/font-awesome.min.css"
   ]
 }
