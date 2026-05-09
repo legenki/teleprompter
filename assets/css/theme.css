@@ -381,6 +381,116 @@ header nav {
 /* Hide help button styles in case CSS is still loaded */
 #get-help { display: none !important; }
 
+/* === MONOCHROME ACCENT OVERRIDES ===
+   Replace every hard-coded blue / red / black highlight with our
+   single olive accent (--tp-ui-accent), varying only the alpha. */
+
+/* Original style.v122.css used #4297d7 in many places — overwrite */
+header h1 .icon-bullhorn,
+.button.active,
+.marker,
+.remote-id,
+.remote-url,
+.close-modal {
+  color: var(--tp-ui-accent) !important;
+}
+/* h1 itself stays warm parchment; only the brand label uses --tp-ui-text */
+header h1 {
+  color: var(--tp-ui-text) !important;
+}
+
+article .teleprompter p:last-child {
+  border-bottom-color: var(--tp-ui-accent) !important;
+}
+
+#software-update a {
+  background: var(--tp-ui-accent) !important;
+  color: var(--tp-ui-bg) !important;
+}
+#software-update a:hover {
+  background: var(--tp-ui-accent-hover) !important;
+}
+
+/* Modal overlay: dark espresso instead of pure black */
+.modal-overlay {
+  background: rgba(31, 22, 16, .9) !important;
+}
+
+/* jQuery UI redmond ships its own blue palette — neutralise it.
+   The .ui-state-* classes color the slider track + handle on hover/focus. */
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default,
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus,
+.ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+  border-color: var(--tp-ui-accent) !important;
+  background: var(--tp-ui-accent) !important;
+  color: var(--tp-ui-bg) !important;
+  font-weight: inherit !important;
+}
+
+/* Slider track and range — accent with alpha for the unfilled track */
+.ui-widget.ui-widget-content {
+  background: rgba(179, 179, 59, .18) !important;
+  border-color: rgba(179, 179, 59, .25) !important;
+}
+.ui-widget-header {
+  background: var(--tp-ui-accent) !important;
+}
+
+/* contenteditable selection inside the prompter — olive tint */
+::selection {
+  background: rgba(179, 179, 59, .35);
+  color: inherit;
+}
+::-moz-selection {
+  background: rgba(179, 179, 59, .35);
+  color: inherit;
+}
+
+/* Color picker swatches — olive frame on focus/hover */
+.colors input[type="color"]:focus {
+  outline: 2px solid var(--tp-ui-accent) !important;
+  outline-offset: 2px;
+  border-color: var(--tp-ui-accent) !important;
+}
+
+/* Remote button highlight when connected */
+.button.remote.active {
+  color: var(--tp-ui-accent) !important;
+  background: var(--tp-ui-accent-soft) !important;
+}
+
+/* Drafts: active item — olive tint */
+.drafts-list li.active {
+  background: var(--tp-ui-accent-soft) !important;
+  border-left: 3px solid var(--tp-ui-accent);
+  padding-left: 9px;
+}
+
+/* Focus rings everywhere: olive instead of browser-default blue */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[contenteditable="true"]:focus,
+[contenteditable=""]:focus {
+  outline: 2px solid var(--tp-ui-accent) !important;
+  outline-offset: 2px;
+}
+
+/* contenteditable prompter — remove default editing outline */
+#teleprompter:focus {
+  outline: none !important;
+}
+
 /* === DRAFTS PANEL === */
 .drafts-panel {
   position: fixed;
