@@ -196,26 +196,30 @@
 
     <script>
       // Load Socket.IO client only when an accompanying server is
-      // actually running. On static hosts (GitHub Pages, plain http
-      // server, etc.) there is no /socket.io endpoint, so we probe
-      // first and hide the Remote button instead of fetching a 404.
+      // running. Heuristics:
+      //  - Known static hosts (github.io, netlify, vercel, pages.dev,
+      //    file://) → no server, hide Remote button immediately so
+      //    we don't pollute the console with a 404.
+      //  - Otherwise try to load the client; if it fails, hide.
       (function() {
         function hideRemote() {
           var btn = document.querySelector('.button.remote');
           if (btn) btn.style.display = 'none';
         }
-        // Probe the socket.io endpoint relative to the current page —
-        // works for both root-mounted and subpath deploys.
-        fetch('socket.io/socket.io.js', { method: 'HEAD' })
-          .then(function(r) {
-            if (!r.ok) { hideRemote(); return; }
-            var s = document.createElement('script');
-            s.id = 'teleprompter-socket';
-            s.src = 'socket.io/socket.io.js';
-            s.onerror = hideRemote;
-            document.head.appendChild(s);
-          })
-          .catch(hideRemote);
+        var host = window.location.hostname;
+        var isStaticHost =
+          window.location.protocol === 'file:' ||
+          /\.github\.io$/.test(host) ||
+          /\.netlify\.app$/.test(host) ||
+          /\.vercel\.app$/.test(host) ||
+          /\.pages\.dev$/.test(host);
+        if (isStaticHost) { hideRemote(); return; }
+
+        var s = document.createElement('script');
+        s.id = 'teleprompter-socket';
+        s.src = 'socket.io/socket.io.js';
+        s.onerror = hideRemote;
+        document.head.appendChild(s);
       })();
     </script>
     <script src="assets/js/plugins.slim.js"></script>
