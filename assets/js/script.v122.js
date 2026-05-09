@@ -1462,11 +1462,14 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
         }
       });
 
+      // Preserve the current pathname so the URL keeps any GitHub Pages
+      // subpath (e.g. /teleprompter/) instead of being reset to '/'.
+      var path = window.location.pathname;
       if (Object.keys(custom).length > 0) {
         var urlParams = new URLSearchParams(custom);
-        window.history.pushState(custom, 'TelePrompter', '/?' + urlParams);
+        window.history.pushState(custom, 'TelePrompter', path + '?' + urlParams);
       } else {
-        window.history.pushState(null, 'TelePrompter', '/');
+        window.history.pushState(null, 'TelePrompter', path);
       }
 
       if (debug) {

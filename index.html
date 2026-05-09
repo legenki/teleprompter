@@ -195,23 +195,28 @@
     </article>
 
     <script>
-      // Load Socket.IO client only when a same-origin server is reachable
-      // (i.e. when running via `npm run server`). On static hosts like
-      // GitHub Pages this 404s gracefully and the Remote button is hidden.
-      (function(d, s, id) {
-        if (d.getElementById(id)) return;
-        var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-        var port = window.location.port ? ':' + window.location.port : '';
-        var src = protocol + '//' + window.location.hostname + port + '/socket.io/socket.io.js';
-        var js = d.createElement(s);
-        js.id = id;
-        js.src = src;
-        js.onerror = function() {
+      // Load Socket.IO client only when an accompanying server is
+      // actually running. On static hosts (GitHub Pages, plain http
+      // server, etc.) there is no /socket.io endpoint, so we probe
+      // first and hide the Remote button instead of fetching a 404.
+      (function() {
+        function hideRemote() {
           var btn = document.querySelector('.button.remote');
           if (btn) btn.style.display = 'none';
-        };
-        d.getElementsByTagName(s)[0].parentNode.insertBefore(js, d.getElementsByTagName(s)[0]);
-      }(document, 'script', 'teleprompter-socket'));
+        }
+        // Probe the socket.io endpoint relative to the current page —
+        // works for both root-mounted and subpath deploys.
+        fetch('socket.io/socket.io.js', { method: 'HEAD' })
+          .then(function(r) {
+            if (!r.ok) { hideRemote(); return; }
+            var s = document.createElement('script');
+            s.id = 'teleprompter-socket';
+            s.src = 'socket.io/socket.io.js';
+            s.onerror = hideRemote;
+            document.head.appendChild(s);
+          })
+          .catch(hideRemote);
+      })();
     </script>
     <script src="assets/js/plugins.slim.js"></script>
     <script src="assets/js/colors.js"></script>

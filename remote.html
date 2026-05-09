@@ -78,20 +78,17 @@
     </div>
 
     <script>
-      (function(d, s, id) {
-        var js, tjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) {
-          return;
-        }
-        js = d.createElement(s);
-        js.id = id;
-        // Use protocol-relative URL to support both http and https
-        var protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-        var port = window.location.port ? ':' + window.location.port : '';
-        js.src = protocol + '//' + window.location.hostname + port + '/socket.io/socket.io.js';
-        tjs.parentNode.insertBefore(js, tjs);
-      }(document, 'script', 'teleprompter-socket'));
-
+      // Load the Socket.IO client relative to the current page so it
+      // works under any path (root or subpath like /teleprompter/).
+      // On a static host with no server, it'll just 404 and the
+      // remote will refuse to connect — there's nothing for the
+      // remote to do without a server anyway.
+      (function() {
+        var s = document.createElement('script');
+        s.id = 'teleprompter-socket';
+        s.src = 'socket.io/socket.io.js';
+        document.head.appendChild(s);
+      })();
     </script>
     <script src="assets/js/remote.v122.js"></script>
     <script>
