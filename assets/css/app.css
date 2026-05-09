@@ -570,7 +570,7 @@ article .teleprompter.flip-xy { transform: rotateX(180deg) rotateY(180deg); poin
 .countdown-num {
   font-family: var(--tp-prompter-font);
   font-size: 200px;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--tp-ui-accent);
   font-variant-numeric: tabular-nums;
   text-shadow: 0 4px 32px rgba(0, 0, 0, .5);
