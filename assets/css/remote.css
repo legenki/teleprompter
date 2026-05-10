@@ -76,7 +76,7 @@ body {
   background: radial-gradient(circle,
     rgba(var(--tp-ui-accent-rgb), .55) 0%,
     rgba(var(--tp-ui-accent-rgb), 0) 70%);
-  animation: drift1 22s ease-in-out infinite alternate;
+  animation: drift1 9s ease-in-out infinite alternate;
 }
 .bg-fx::after {
   width: 540px; height: 540px;
@@ -84,7 +84,7 @@ body {
   background: radial-gradient(circle,
     rgba(var(--tp-ui-accent-rgb), .45) 0%,
     rgba(var(--tp-ui-accent-rgb), 0) 70%);
-  animation: drift2 28s ease-in-out infinite alternate;
+  animation: drift2 11s ease-in-out infinite alternate;
 }
 
 /* Extra blobs as standalone elements (gives us 5 total halos) */
@@ -102,17 +102,17 @@ body {
 .bg-fx-orb.o1 {
   width: 320px; height: 320px;
   top: 18%; left: 55%;
-  animation: drift3 26s ease-in-out infinite alternate;
+  animation: drift3 10s ease-in-out infinite alternate;
 }
 .bg-fx-orb.o2 {
   width: 380px; height: 380px;
   top: 60%; left: 8%;
-  animation: drift4 32s ease-in-out infinite alternate;
+  animation: drift4 13s ease-in-out infinite alternate;
 }
 .bg-fx-orb.o3 {
   width: 260px; height: 260px;
   top: 35%; right: 12%;
-  animation: drift5 24s ease-in-out infinite alternate;
+  animation: drift5 8s ease-in-out infinite alternate;
 }
 
 @keyframes drift1 {
