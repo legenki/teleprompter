@@ -70,11 +70,15 @@
     var fadingIn = target > 0;
     els.forEach(function(el) {
       if (fadingIn) {
-        // Force display so a base CSS 'display:none' doesn't keep it hidden.
-        var d = (el.tagName === 'SPAN' || el.tagName === 'A') ? 'inline' : 'block';
-        el.style.display = d;
-        // Start from 0 if the element was hidden, then transition up.
-        if (getComputedStyle(el).opacity === '0') {
+        // Only force display if the element is currently hidden.
+        // Otherwise we'd clobber CSS layout types like inline-flex
+        // (header h1) or flex (header nav) and the children would
+        // re-stack as block.
+        var current = getComputedStyle(el).display;
+        if (current === 'none') {
+          var d = (el.tagName === 'SPAN' || el.tagName === 'A') ? 'inline' : 'block';
+          el.style.display = d;
+          // Start from 0 then transition up.
           el.style.opacity = '0';
           // Force a reflow so the transition starts from 0.
           // eslint-disable-next-line no-unused-expressions
@@ -83,7 +87,7 @@
       }
       el.style.transition = duration > 0 ? 'opacity ' + duration + 'ms' : '';
       requestAnimationFrame(function() { el.style.opacity = target; });
-      if (!fadingIn) {
+      if (!fadingIn && target === 0) {
         setTimeout(function() { el.style.display = 'none'; }, duration);
       }
     });
