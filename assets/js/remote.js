@@ -176,6 +176,8 @@
 
       var control = $elm.sliderSelect.value;
       var val = parseInt(e.target.value);
+      var min = parseFloat($elm.slider.min) || 0;
+      var max = parseFloat($elm.slider.max) || 50;
 
       if (control === 'font') {
         config.fontSize = val;
@@ -183,6 +185,10 @@
         config.pageScrollPercent = val;
       } else if (control === 'speed') {
         config.pageSpeed = val;
+      }
+
+      if (typeof TPColors !== 'undefined') {
+        TPColors.paintRangeFill($elm.slider, min, max);
       }
 
       if (socket && remote) {
@@ -195,21 +201,22 @@
     /* Slider Select Change */
     $elm.sliderSelect.addEventListener('change', function(e) {
       var val = e.target.value;
-
+      var min = 0, max = 50;
       if (val === 'font') {
-        $elm.slider.setAttribute('min', 12);
-        $elm.slider.setAttribute('max', 100);
+        min = 12; max = 100;
         $elm.slider.value = config.fontSize;
       } else if (val === 'scroll') {
-        $elm.slider.setAttribute('min', 0);
-        $elm.slider.setAttribute('max', 100);
+        max = 100;
         $elm.slider.value = config.pageScrollPercent;
       } else if (val === 'speed') {
-        $elm.slider.setAttribute('min', 0);
-        $elm.slider.setAttribute('max', 50);
+        max = 50;
         $elm.slider.value = config.pageSpeed;
       }
-
+      $elm.slider.setAttribute('min', min);
+      $elm.slider.setAttribute('max', max);
+      if (typeof TPColors !== 'undefined') {
+        TPColors.paintRangeFill($elm.slider, min, max);
+      }
       $elm.sliderSelect.blur();
     });
 
@@ -528,17 +535,30 @@
     }
 
 
-    // Update Slider Values
+    // Update Slider Values + filled track
     if (!controller || controller === 'slider') {
       var control = $elm.sliderSelect.value;
-
+      var min = 0, max = 50;
       if (control === 'font') {
         $elm.slider.value = config.fontSize;
+        min = 12; max = 100;
       } else if (control === 'scroll') {
         $elm.slider.value = config.pageScrollPercent;
+        max = 100;
       } else if (control === 'speed') {
         $elm.slider.value = config.pageSpeed;
+        max = 50;
       }
+      if (typeof TPColors !== 'undefined') {
+        TPColors.paintRangeFill($elm.slider, min, max);
+      }
+    }
+
+    // Mirror the prompter's text/background colors onto the remote
+    // chrome so the two devices feel like one app.
+    if (!controller && typeof TPColors !== 'undefined') {
+      if (config.textColor) TPColors.applyAccent(config.textColor);
+      if (config.backgroundColor) TPColors.applySurface(config.backgroundColor);
     }
   }
 

@@ -5,84 +5,102 @@
     <title>Teleprompter Remote</title>
 
     <!-- Mobile Specific Meta Tags -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Remote">
     <meta name="application-name" content="Remote">
+    <meta name="theme-color" content="#1f1610">
     <meta name="robots" content="noindex,nofollow">
 
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap">
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/css/remote.css">
-
-    <link rel="preload" href="assets/font/fontawesome-webfont.woff?v=3.2.1" as="font" type="font/woff2" crossorigin>
 
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <link rel="apple-touch-icon" sizes="192x192" href="assets/img/apple/icon-192x192.png" />
   </head>
   <body>
+    <!-- Setup screen: enter the 6-character code -->
     <div id="remote-setup" class="remote-wrapper">
-      <div>
-        <p><input type="text" class="remote-id" name="remote-id" maxlength="6" placeholder="ABC123" onfocus="this.placeholder=''" onblur="this.placeholder='ABC123'" required /></p>
-        <p>Enter Remote ID to Connect</p>
+      <div class="setup-card">
+        <svg class="setup-logo" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11l18-5v12L3 14v-3z"></path>
+          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+        </svg>
+        <h1>Remote</h1>
+        <p class="setup-hint">Enter the 6-character code shown in TelePrompter</p>
+        <input type="text" class="remote-id" name="remote-id" maxlength="6" placeholder="ABC123" autocomplete="off" autocapitalize="characters" required />
       </div>
-
-      <div class="footer text-center">
-        TELEPROMPTER
-      </div>
+      <div class="footer text-center">TELEPROMPTER</div>
     </div>
 
+    <!-- Control screen -->
     <div id="remote-control" class="remote-wrapper">
-      <div class="header">
-        <button class="button small icon-eye-close dim-controls" id="button-dim" aria-label="Dim While Reading" title="Dim While Reading"></button>
-        <button class="button small icon-undo reset" id="button-reset" aria-label="Reset TelePrompter" title="Reset TelePrompter"></button>
-        <button class="button small icon-text-width flip-x" id="button-flip-x" aria-label="Flip Text Horizontally" title="Flip Text Horizontally"></button>
-        <button class="button small icon-text-height flip-y" id="button-flip-y" aria-label="Flip Text Vertically" title="Flip Text Vertically"></button>
-        <button class="button small icon-off power" id="button-power" aria-label="Disconnect Remote" title="Disconnect Remote"></button>
-      </div>
+      <header class="topbar">
+        <button class="icon-btn dim-controls" id="button-dim" aria-label="Reading Focus" title="Reading Focus">
+          <svg class="dim-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+          <svg class="dim-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="3" x2="12" y2="21" stroke-dasharray="2 3"></line></svg>
+        </button>
+        <button class="icon-btn reset" id="button-reset" aria-label="Reset" title="Reset">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+        </button>
+        <button class="icon-btn flip-x" id="button-flip-x" aria-label="Flip Horizontal" title="Flip Horizontal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"></path><path d="M16 7l4 5-4 5"></path><path d="M8 7l-4 5 4 5"></path></svg>
+        </button>
+        <button class="icon-btn flip-y" id="button-flip-y" aria-label="Flip Vertical" title="Flip Vertical">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"></path><path d="M7 8L12 4l5 4"></path><path d="M7 16l5 4 5-4"></path></svg>
+        </button>
+        <button class="icon-btn power" id="button-power" aria-label="Disconnect" title="Disconnect">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+        </button>
+      </header>
 
       <div class="clock-wrapper">
-        <i class="icon icon-bullhorn"></i>&nbsp;
+        <svg class="brand-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11l18-5v12L3 14v-3z"></path>
+          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+        </svg>
         <span class="clock" id="current-time">00:00:00</span>
       </div>
 
-      <div class="remote">
-        <div class="text-center">
-          <button class="button icon-chevron-up up" id="button-up" aria-label="" title=""></button>
+      <div class="dpad" role="group" aria-label="Scroll & playback">
+        <div class="dpad-row dpad-row-up">
+          <button class="dpad-btn up" id="button-up" aria-label="Scroll up">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 15 12 9 18 15"></polyline></svg>
+          </button>
         </div>
-
-        <div class="text-center">
-          <button class="button icon-minus minus" id="button-slower" aria-label="" title=""></button>
-          <button class="button icon-play play" id="button-play" aria-label="" title=""></button>
-          <button class="button icon-plus plus" id="button-faster" aria-label="" title=""></button>
+        <div class="dpad-row dpad-row-mid">
+          <button class="dpad-btn minus" id="button-slower" aria-label="Slower">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <button class="dpad-btn play btn-play icon-play" id="button-play" aria-label="Play / Pause">
+            <svg class="play-icon" width="42" height="42" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+            <svg class="pause-icon" width="42" height="42" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+          </button>
+          <button class="dpad-btn plus" id="button-faster" aria-label="Faster">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
         </div>
-
-        <div class="text-center">
-          <button class="button icon-chevron-down down" id="button-down" aria-label="" title=""></button>
+        <div class="dpad-row dpad-row-down">
+          <button class="dpad-btn down" id="button-down" aria-label="Scroll down">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
         </div>
       </div>
 
       <div class="quick-slider">
-        <select id="slider-select">
+        <select id="slider-select" aria-label="Slider target">
           <option value="font">Font</option>
           <option value="scroll">Scroll</option>
           <option value="speed" selected>Speed</option>
         </select>
-        <input type="range" min="0" max="50" value="50" class="slider" id="slider">
+        <input type="range" min="0" max="50" value="50" class="slider" id="slider" aria-label="Value">
       </div>
 
       <div class="footer text-center" id="remote-id"></div>
     </div>
 
     <script>
-      // Load the Socket.IO client relative to the current page so it
-      // works under any path (root or subpath like /teleprompter/).
-      // On a static host with no server, it'll just 404 and the
-      // remote will refuse to connect — there's nothing for the
-      // remote to do without a server anyway.
+      // Load Socket.IO relative to the page so it works under any path.
       (function() {
         var s = document.createElement('script');
         s.id = 'teleprompter-socket';
@@ -91,12 +109,10 @@
       })();
     </script>
     <script src="assets/js/config.js"></script>
+    <script src="assets/js/colors.js"></script>
     <script src="assets/js/remote.js"></script>
     <script>
-      // Initialize App
-      window.onload = function() {
-        TelePrompterRemote.init();
-      };
+      window.onload = function () { TelePrompterRemote.init(); };
     </script>
   </body>
 </html>
