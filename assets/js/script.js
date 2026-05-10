@@ -179,7 +179,7 @@ var TelePrompter = (function() {
     $elm.closeModal = $('.close-modal');
     $elm.fontSize = $('.font_size');
     $elm.header = $('header');
-    $elm.headerContent = $('header h1, header nav');
+    // (formerly cached for fadeTo dim — header now stays at full opacity always)
     $elm.markerOverlay = $('.overlay');
     $elm.modal = $('#modal');
     $elm.remoteID = $('.remote-id');
@@ -606,17 +606,11 @@ var TelePrompter = (function() {
     if (config.dimControls) {
       config.dimControls = false;
       $elm.buttonDimControls.removeClass('icon-eye-close').addClass('icon-eye-open');
-      $elm.headerContent.fadeTo('slow', 1);
       $elm.markerOverlay.removeClass('show');
     } else {
       config.dimControls = true;
       $elm.buttonDimControls.removeClass('icon-eye-open').addClass('icon-eye-close');
-      // Show focus overlay immediately so the effect is visible even
-      // before play; header dims only while actually playing.
       $elm.markerOverlay.addClass('show');
-      if (isPlaying) {
-        $elm.headerContent.fadeTo('slow', 0.15);
-      }
     }
 
     localStorage.setItem('teleprompter_dim_controls', config.dimControls);
@@ -1284,7 +1278,6 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
     $elm.buttonPlay.removeClass('icon-play').addClass('icon-pause');
 
     if (config.dimControls) {
-      $elm.headerContent.fadeTo('slow', 0.15);
       $elm.markerOverlay.addClass('show');
     }
 
@@ -1316,7 +1309,6 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
     $elm.teleprompter.attr('contenteditable', true);
 
     if (config.dimControls) {
-      $elm.headerContent.fadeTo('slow', 1);
       $elm.markerOverlay.removeClass('show');
     }
 
