@@ -1635,14 +1635,34 @@ if (oldConfig.dimControls !== newConfig.dimControls) {
     var $draftsBackdrop = document.getElementById('drafts-backdrop');
     var $draftSave = document.getElementById('draft-save');
     var $draftNew = document.getElementById('draft-new');
+    var $refreshCode = document.getElementById('refresh-code');
 
     if ($draftsBtn) $draftsBtn.addEventListener('click', openDraftsPanel);
     if ($draftsClose) $draftsClose.addEventListener('click', closeDraftsPanel);
     if ($draftsBackdrop) $draftsBackdrop.addEventListener('click', closeDraftsPanel);
     if ($draftSave) $draftSave.addEventListener('click', saveCurrentAsDraft);
     if ($draftNew) $draftNew.addEventListener('click', newDraft);
+    if ($refreshCode) $refreshCode.addEventListener('click', regenerateRemoteCode);
 
     renderDrafts();
+  }
+
+  /**
+   * Drop the saved Remote ID, disconnect any current socket, and
+   * reconnect with a fresh randomString() — gives the user a brand
+   * new 6-character code in the modal.
+   */
+  function regenerateRemoteCode() {
+    try { localStorage.removeItem('teleprompter_remote_id'); } catch (e) {}
+    if (socket) {
+      try { socket.disconnect(); } catch (e) {}
+      socket = null;
+    }
+    remote = null;
+    $elm.buttonRemote.removeClass('active');
+    // Reconnect → remoteConnect() will call randomString() since no
+    // currentRemote is passed in.
+    remoteConnect();
   }
 
   /* Expose Select Control to Public TelePrompter Object */

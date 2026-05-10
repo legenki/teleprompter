@@ -1,5 +1,5 @@
 // Bump this on every release so old caches are invalidated.
-var CACHE_VERSION = 'v1.3.2-2026-05-10';
+var CACHE_VERSION = 'v1.3.3-2026-05-10';
 var CACHE_NAME = 'teleprompter:' + CACHE_VERSION;
 
 // Files we want available offline. They are still revalidated on every

@@ -431,6 +431,30 @@ article .teleprompter.flip-xy { transform: rotateX(180deg) rotateY(180deg); poin
   margin: 0 auto;
 }
 
+.refresh-code {
+  appearance: none;
+  background: var(--tp-ui-surface2);
+  border: 1px solid var(--tp-ui-border);
+  color: var(--tp-ui-text);
+  font-family: var(--tp-ui-font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  margin-top: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.refresh-code:hover {
+  background: var(--tp-ui-surface3);
+  border-color: var(--tp-ui-accent);
+  color: var(--tp-ui-accent);
+}
+.refresh-code:active { transform: scale(.97); }
+
 /* ==========================================================================
    Drafts side panel
    ========================================================================== */
