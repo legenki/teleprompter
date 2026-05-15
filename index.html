@@ -228,9 +228,7 @@
       })();
     </script>
     <script src="assets/js/vendor.js"></script>
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/colors.js"></script>
-    <script src="assets/js/script.js"></script>
+    <script type="module" src="assets/js/app.js"></script>
 
     <script>
       // Load Service Worker for PWA
@@ -265,10 +263,6 @@
         });
       }
 
-      // Initialize App
-      window.onload = function() {
-        TelePrompter.init();
-      };
     </script>
   </body>
 </html>

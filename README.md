@@ -27,6 +27,7 @@
 - **Remote control** — run the prompter on a laptop and drive it from your phone over Wi-Fi.
 - **Custom colors** — pick any text and background color; the whole UI re-skins to match.
 - **Keyboard shortcuts** + presentation-remote support.
+- **Modern Architecture** — fully refactored into ES6 Modules with a centralized reactive state store (Pub/Sub pattern). No more messy jQuery UI plugins.
 - **PWA** — installable, works offline once loaded.
 
 ## Keyboard shortcuts
@@ -50,7 +51,7 @@ The remote is just a second browser window pointed at `/remote`. The two windows
 ┌─────────────────────────┐                                ┌─────────────────────────┐
 │   Main app              │                                │   Remote (phone)        │
 │   index.html            │                                │   /remote.html          │
-│   TelePrompter          │                                │   TelePrompterRemote    │
+│   assets/js/app.js      │                                │   assets/js/remote-app.js│
 └────────────┬────────────┘                                └────────────┬────────────┘
              │                                                          │
              │  1. Click the Remote icon                                │
