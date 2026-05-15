@@ -21,6 +21,9 @@ export class RemoteUI {
     
     // Listen to store changes
     store.addEventListener('configChanged', () => this.updateUI());
+
+    // Paint initial state
+    this.updateUI();
   }
 
   cacheElements() {
@@ -149,19 +152,21 @@ export class RemoteUI {
       const val = e.target.value;
       const config = store.getState().config;
       let min = 0, max = 50;
+      let targetValue = 0;
       
       if (val === 'font') {
         min = 12; max = 100;
-        this.$elm.slider.value = config.fontSize;
+        targetValue = config.fontSize;
       } else if (val === 'scroll') {
         max = 100;
-        this.$elm.slider.value = config.pageScrollPercent;
+        targetValue = config.pageScrollPercent;
       } else if (val === 'speed') {
         max = 50;
-        this.$elm.slider.value = config.pageSpeed;
+        targetValue = config.pageSpeed;
       }
       this.$elm.slider.setAttribute('min', min);
       this.$elm.slider.setAttribute('max', max);
+      this.$elm.slider.value = targetValue;
       paintRangeFill(this.$elm.slider, min, max);
       this.$elm.sliderSelect.blur();
     });
@@ -302,16 +307,20 @@ export class RemoteUI {
     if (!controller || controller === 'slider') {
       const control = this.$elm.sliderSelect.value;
       let min = 0, max = 50;
+      let targetValue = 0;
       if (control === 'font') {
-        this.$elm.slider.value = config.fontSize;
+        targetValue = config.fontSize;
         min = 12; max = 100;
       } else if (control === 'scroll') {
-        this.$elm.slider.value = config.pageScrollPercent;
+        targetValue = config.pageScrollPercent;
         max = 100;
       } else if (control === 'speed') {
-        this.$elm.slider.value = config.pageSpeed;
+        targetValue = config.pageSpeed;
         max = 50;
       }
+      this.$elm.slider.setAttribute('min', min);
+      this.$elm.slider.setAttribute('max', max);
+      this.$elm.slider.value = targetValue;
       paintRangeFill(this.$elm.slider, min, max);
     }
 

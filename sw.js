@@ -1,5 +1,5 @@
 // Bump this on every release so old caches are invalidated.
-var CACHE_VERSION = 'v1.3.5-2026-05-10';
+var CACHE_VERSION = 'v2.0.0-2026-05-15';
 var CACHE_NAME = 'teleprompter:' + CACHE_VERSION;
 
 // Files we want available offline. They are still revalidated on every
@@ -8,11 +8,21 @@ var CACHE_NAME = 'teleprompter:' + CACHE_VERSION;
 var PRECACHE = [
   './',
   './index.html',
+  './remote.html',
   './assets/css/app.css',
+  './assets/css/remote.css',
   './assets/js/vendor.js',
   './assets/js/config.js',
   './assets/js/colors.js',
-  './assets/js/script.js',
+  './assets/js/store.js',
+  './assets/js/timer.js',
+  './assets/js/ui.js',
+  './assets/js/teleprompter.js',
+  './assets/js/socket-client.js',
+  './assets/js/app.js',
+  './assets/js/remote-ui.js',
+  './assets/js/remote-socket.js',
+  './assets/js/remote-app.js',
   './manifest.json'
 ];
 
