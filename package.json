@@ -31,14 +31,21 @@
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js . --fix",
     "audit": "npm audit",
-    "audit:fix": "npm audit fix"
+    "audit:fix": "npm audit fix",
+    "dev:web":   "vite --config vite.config.web.js",
+    "dev:ext":   "vite build --config vite.config.ext.js --watch",
+    "build:web": "vite build --config vite.config.web.js",
+    "build:ext": "vite build --config vite.config.ext.js",
+    "build":     "npm run build:web && npm run build:ext"
   },
   "dependencies": {
     "express": "^4.18.2",
+    "jquery": "^4.0.0",
     "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "vite": "^8.1.0"
   }
 }
