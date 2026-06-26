@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>TelePrompter</title>
+
+    <!-- Mobile Specific Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="TelePrompter" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1f1610" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0,viewport-fit=cover" />
+
+    <!-- SEO -->
+    <meta name="description" content="Browser-based teleprompter with remote control. No install, no sign-up.">
+    <meta name="robots" content="index,follow">
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="TelePrompter">
+    <meta property="og:url" content="https://legenki.github.io/teleprompter/">
+    <meta property="og:image" content="https://legenki.github.io/teleprompter/assets/img/social-card.png">
+    <meta property="og:description" content="Browser-based teleprompter with remote control.">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="TelePrompter">
+    <meta property="twitter:description" content="Browser-based teleprompter with remote control.">
+    <meta property="twitter:image" content="https://legenki.github.io/teleprompter/assets/img/social-card.png">
+
+    <!-- Manifest / icons -->
+    <link rel="manifest" href="manifest.json" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="canonical" href="https://legenki.github.io/teleprompter/" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../src/styles/app.css">
+  </head>
+
+  <body id="gui">
+    <!-- Drafts (saved scripts) panel -->
+    <aside id="drafts-panel" class="drafts-panel" aria-hidden="true">
+      <div class="drafts-header">
+        <h2>Saved Scripts</h2>
+        <button class="drafts-close" id="drafts-close" aria-label="Close" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="drafts-actions">
+        <button class="drafts-btn primary" id="draft-save">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save Current
+        </button>
+        <button class="drafts-btn" id="draft-new">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New
+        </button>
+      </div>
+      <ul class="drafts-list" id="drafts-list"></ul>
+      <p class="drafts-empty" id="drafts-empty">No saved scripts yet. Click <strong>Save Current</strong> to keep this one.</p>
+    </aside>
+    <div id="drafts-backdrop" class="drafts-backdrop" hidden></div>
+
+    <!-- Countdown overlay before play -->
+    <div id="countdown" class="countdown" hidden aria-live="assertive">
+      <div class="countdown-num">3</div>
+    </div>
+
+    <div id="modal">
+      <a class="button close-modal" href="javascript:void(0)" role="button" aria-label="Close Modal" title="Close Modal">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </a>
+
+      <div class="modal-content">
+        <!-- Remote Control -->
+        <div id="remote-control-modal">
+          <h1>Remote Control</h1>
+          <p>Access the Following URL from another device:</p>
+          <p class="remote-url"></p>
+          <p>Enter this Remote ID:</p>
+          <p class="remote-id"></p>
+          <div id="qr-code"></div>
+          <p>Remote Control QR Code</p>
+          <button type="button" id="refresh-code" class="refresh-code" aria-label="Generate a new code">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+            Generate a new code
+          </button>
+        </div>
+
+        <!-- Software Update -->
+        <div id="software-update">
+          <h1>Software Update</h1>
+          <p>Thanks for using <strong>TelePrompter</strong>. We just wanted to let you know that we have updated our site since the last time you visited.</p>
+          <a href="https://github.com/legenki/teleprompter/releases/latest" target="_blank" rel="nofollow noopener">See Updates</a>
+        </div>
+      </div>
+      <div class="modal-overlay"></div>
+    </div>
+
+    <header>
+      <h1>
+        <svg class="logo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 11l18-5v12L3 14v-3z"></path>
+          <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+        </svg>
+        <span class="brand">Teleprompter</span>
+        <span class="clock">00:00:00</span>
+        <span class="stats" id="stats" aria-live="polite">
+          <span class="stat-words"><span id="word-count">0</span> words</span>
+          <span class="stat-sep">·</span>
+          <span class="stat-time" id="reading-time">~0:00</span>
+        </span>
+      </h1>
+      <nav>
+        <div class="colors" role="group" aria-label="Color Pickers">
+          <input type="color" id="text-color" value="#b3b33b" aria-label="Text Color" title="Text Color">
+          <input type="color" id="background-color" value="#1f1610" aria-label="Background Color" title="Background Color">
+        </div>
+        <div class="sliders">
+          <label class="font_size_label" aria-label="Font Size">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+            <span id="font-size-value">60</span>
+            <input type="range" min="12" max="100" value="60" class="font_size slider" id="font-size-slider" aria-label="Font Size">
+          </label>
+          <label class="speed_label" aria-label="Page Speed">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4"></path><path d="m16.2 7.8 2.9-2.9"></path><path d="M18 12h4"></path><path d="m16.2 16.2 2.9 2.9"></path><circle cx="12" cy="14" r="8"></circle><path d="M12 14l3-3"></path></svg>
+            <span id="speed-value">35</span>
+            <input type="range" min="0" max="50" value="35" class="speed slider" id="speed-slider" aria-label="Page Speed">
+          </label>
+        </div>
+        <div class="buttons" role="group" aria-label="TelePrompter Controls">
+          <button class="theme-toggle" id="drafts-toggle" aria-label="Drafts" title="Saved Scripts" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+          </button>
+          <button class="button small btn-remote remote" aria-label="Remote Control" title="Remote Control">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"></rect><circle cx="12" cy="7" r="1.2" fill="currentColor"></circle><line x1="9" y1="11" x2="15" y2="11"></line><line x1="9" y1="14" x2="15" y2="14"></line><line x1="9" y1="17" x2="13" y2="17"></line></svg>
+          </button>
+          <button class="button small btn-dim dim-controls" aria-label="Reading Focus" title="Reading Focus (dim edges, highlight current line)">
+            <svg class="dim-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+            <svg class="dim-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="3" x2="12" y2="21" stroke-dasharray="2 3"></line></svg>
+          </button>
+          <button class="button small btn-reset reset" aria-label="Reset TelePrompter" title="Reset TelePrompter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+          </button>
+          <button class="button small btn-flipx flip-x" aria-label="Flip Text Horizontally" title="Flip Text Horizontally">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"></path><path d="M16 7l4 5-4 5"></path><path d="M8 7l-4 5 4 5"></path></svg>
+          </button>
+          <button class="button small btn-flipy flip-y" aria-label="Flip Text Vertically" title="Flip Text Vertically">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"></path><path d="M7 8L12 4l5 4"></path><path d="M7 16l5 4 5-4"></path></svg>
+          </button>
+          <button class="button btn-play icon-play play active" aria-label="Play / Pause" title="Play / Pause TelePrompter">
+            <svg class="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+            <svg class="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+    <article>
+      <div class="overlay">
+        <div class="top"></div>
+        <div class="bottom"></div>
+      </div>
+      <div class="teleprompter" id="teleprompter" role="textbox" aria-multiline="true" aria-label="TelePrompter Text" contenteditable>
+        Oh, hello there. I did not see you come in. I was too busy reading off this TelePrompter. It does some pretty cool
+        things, for example:
+        <br><br>
+        You can edit the text right on the page. It'll even save it for you if you happen to leave the page. That's some
+        smart thinking.
+        <br><br>
+        If you're using an iPad, you can add a shortcut to your home screen for full screen awesomeness.
+        <br><br>
+        You can also use some handy keyboard shortcuts to speed things up. You can adjust the speed and font size at the
+        top right as well. We're also experimenting with ways to flip the text around for you fancy folks using mirrors.
+        <br><br>
+        The keyboard shortcuts are as follows:
+        <br><br>
+        Up: Increases Font Size
+        <br><br>
+        Down: Decreases Font Size
+        <br><br>
+        Left: Slows Down Teleprompter
+        <br><br>
+        Right: Speeds Up Teleprompter
+        <br><br>
+        Space: Starts / Stops Teleprompter
+        <br><br>
+        Escape: Resets Everything
+        <br><br>
+        Finally, we also made an effort to make sure your text will be easy to read. So if you are pasting text from a
+        Microsoft Word document, we'll do some cleaning up to make the breaks flow more easily.
+        <br><br>
+        Thanks for stopping by.
+      </div>
+    </article>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
