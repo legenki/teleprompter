@@ -1,0 +1,423 @@
+/* TelePrompter Remote — same palette and Lucide-style icons as the
+   main app. The CSS variables are mutated live by TPColors when the
+   prompter pushes a new config (text/background pickers). */
+
+:root {
+  --tp-ui-bg:           #1f1610;
+  --tp-ui-surface:      #1f1610;
+  --tp-ui-surface2:     #2a1c14;
+  --tp-ui-surface3:     #3a2920;
+  --tp-ui-border:       #4a342a;
+  --tp-ui-text:         #f4ead8;
+  --tp-ui-muted:        #b8a892;
+  --tp-ui-accent:       #b3b33b;
+  --tp-ui-accent-hover: #cdcd55;
+  --tp-ui-accent-rgb:   179, 179, 59;
+  --tp-ui-accent-soft:  rgba(var(--tp-ui-accent-rgb), .15);
+  --tp-ui-danger:       #d97443;
+
+  --tp-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                'Helvetica Neue', Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  background-color: var(--tp-ui-bg);
+  color: var(--tp-ui-text);
+  font-family: var(--tp-ui-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+  position: relative;
+  isolation: isolate;
+}
+
+/* ==========================================================================
+   Animated drifting blobs in the background
+   Five large radial-gradient circles slowly orbit the screen, blurred so
+   they read as soft accent halos. All in the live --tp-ui-accent so they
+   re-tint when the prompter pushes a new color.
+   ========================================================================== */
+.bg-fx {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 50%,
+      rgba(var(--tp-ui-accent-rgb), .04) 0%,
+      transparent 60%);
+}
+.bg-fx::before,
+.bg-fx::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .35;
+  will-change: transform;
+}
+.bg-fx::before {
+  width: 480px; height: 480px;
+  left: -120px; top: -120px;
+  background: radial-gradient(circle,
+    rgba(var(--tp-ui-accent-rgb), .55) 0%,
+    rgba(var(--tp-ui-accent-rgb), 0) 70%);
+  animation: drift1 9s ease-in-out infinite alternate;
+}
+.bg-fx::after {
+  width: 540px; height: 540px;
+  right: -160px; bottom: -160px;
+  background: radial-gradient(circle,
+    rgba(var(--tp-ui-accent-rgb), .45) 0%,
+    rgba(var(--tp-ui-accent-rgb), 0) 70%);
+  animation: drift2 11s ease-in-out infinite alternate;
+}
+
+/* Extra blobs as standalone elements (gives us 5 total halos) */
+.bg-fx-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .28;
+  pointer-events: none;
+  will-change: transform;
+  background: radial-gradient(circle,
+    rgba(var(--tp-ui-accent-rgb), .5) 0%,
+    rgba(var(--tp-ui-accent-rgb), 0) 70%);
+}
+.bg-fx-orb.o1 {
+  width: 320px; height: 320px;
+  top: 18%; left: 55%;
+  animation: drift3 10s ease-in-out infinite alternate;
+}
+.bg-fx-orb.o2 {
+  width: 380px; height: 380px;
+  top: 60%; left: 8%;
+  animation: drift4 13s ease-in-out infinite alternate;
+}
+.bg-fx-orb.o3 {
+  width: 260px; height: 260px;
+  top: 35%; right: 12%;
+  animation: drift5 8s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(80px, 60px) scale(1.15); }
+  100% { transform: translate(40px, 120px) scale(.95); }
+}
+@keyframes drift2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-100px, -80px) scale(1.2); }
+  100% { transform: translate(-60px, -40px) scale(.9); }
+}
+@keyframes drift3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-140px, 100px) scale(1.15); }
+}
+@keyframes drift4 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(120px, -90px) scale(1.1); }
+}
+@keyframes drift5 {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-80px, 140px) scale(1.2); }
+}
+
+/* Be kind to users who set 'reduce motion' in OS settings */
+@media (prefers-reduced-motion: reduce) {
+  .bg-fx::before,
+  .bg-fx::after,
+  .bg-fx-orb { animation: none; }
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible {
+  outline: 2px solid var(--tp-ui-accent);
+  outline-offset: 2px;
+}
+
+.remote-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#remote-control { display: none; }
+
+/* ==========================================================================
+   Setup screen
+   ========================================================================== */
+.setup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+}
+.setup-logo { color: var(--tp-ui-accent); }
+.setup-card h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--tp-ui-text);
+  letter-spacing: -.01em;
+}
+.setup-hint {
+  font-size: 13px;
+  color: var(--tp-ui-muted);
+  font-weight: 400;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.remote-id {
+  width: 240px;
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  font-variant-numeric: tabular-nums;
+  background: var(--tp-ui-surface2);
+  border: 1px solid var(--tp-ui-border);
+  border-radius: 12px;
+  color: var(--tp-ui-accent);
+  padding: 12px 16px;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+.remote-id::placeholder {
+  color: var(--tp-ui-muted);
+  opacity: .5;
+  letter-spacing: .14em;
+}
+.remote-id:focus { border-color: var(--tp-ui-accent); }
+.remote-id.error,
+.remote-id.error:focus { border-color: var(--tp-ui-danger); animation: shake .25s; }
+.remote-id.success    { border-color: var(--tp-ui-accent); }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  75%      { transform: translateX(4px); }
+}
+
+/* ==========================================================================
+   Control screen
+   ========================================================================== */
+.topbar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 16px);
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tp-ui-muted);
+  border-radius: 50%;
+  transition: background .15s, color .15s, transform .1s;
+}
+.icon-btn:active { transform: scale(.92); background: var(--tp-ui-surface3); }
+.icon-btn.active { color: var(--tp-ui-accent); background: var(--tp-ui-accent-soft); }
+
+/* Dim icon-pair toggling */
+.dim-controls .dim-on  { display: inline; }
+.dim-controls .dim-off { display: none; }
+.dim-controls.icon-eye-open .dim-on  { display: none; }
+.dim-controls.icon-eye-open .dim-off { display: inline; }
+
+/* Power button — danger tint on press */
+.icon-btn.power:active { color: var(--tp-ui-danger); }
+
+.clock-wrapper {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 80px);
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .04em;
+  color: var(--tp-ui-text);
+}
+.clock-wrapper .brand-icon { color: var(--tp-ui-accent); }
+
+/* ---- D-pad ---- */
+.dpad {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.dpad-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.dpad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--tp-ui-text);
+  background: var(--tp-ui-surface2);
+  border: 1px solid var(--tp-ui-border);
+  transition: background .12s, color .12s, transform .08s, border-color .12s;
+}
+.dpad-btn:active {
+  transform: scale(.94);
+  background: var(--tp-ui-surface3);
+  border-color: var(--tp-ui-accent);
+  color: var(--tp-ui-accent);
+}
+.dpad-btn.up,
+.dpad-btn.down { width: 80px; }
+
+.dpad-btn.play {
+  width: 96px;
+  height: 96px;
+  background: var(--tp-ui-accent);
+  border-color: var(--tp-ui-accent);
+  color: var(--tp-ui-bg);
+  box-shadow: 0 4px 24px rgba(var(--tp-ui-accent-rgb), .25);
+}
+.dpad-btn.play:active {
+  background: var(--tp-ui-accent-hover);
+  border-color: var(--tp-ui-accent-hover);
+  color: var(--tp-ui-bg);
+  transform: scale(.96);
+}
+
+/* Play/Pause icon swap (mirrors the main app's .btn-play CSS) */
+.btn-play .play-icon  { display: inline; }
+.btn-play .pause-icon { display: none; }
+.btn-play.icon-pause .play-icon  { display: none; }
+.btn-play.icon-pause .pause-icon { display: inline; }
+
+/* ---- Quick slider ---- */
+.quick-slider {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 80px);
+  left: 16px; right: 16px;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+#slider-select {
+  align-self: center;
+  background: transparent;
+  border: none;
+  color: var(--tp-ui-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 4px 18px 4px 4px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b8a892' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  background-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    var(--tp-ui-accent) 0%,
+    var(--tp-ui-accent) var(--fill, 50%),
+    var(--tp-ui-surface3) var(--fill, 50%),
+    var(--tp-ui-surface3) 100%
+  );
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--tp-ui-accent);
+  border: 3px solid var(--tp-ui-surface);
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  cursor: grab;
+}
+.slider::-webkit-slider-thumb:active { background: var(--tp-ui-accent-hover); cursor: grabbing; }
+.slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--tp-ui-accent);
+  border: 3px solid var(--tp-ui-surface);
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  cursor: grab;
+}
+.slider::-moz-range-track    { background: var(--tp-ui-surface3); height: 6px; border-radius: 3px; }
+.slider::-moz-range-progress { background: var(--tp-ui-accent);   height: 6px; border-radius: 3px; }
+
+/* ---- Footer (REMOTE: ID label) ---- */
+.footer {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 24px);
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  color: var(--tp-ui-muted);
+  text-transform: uppercase;
+}
+#remote-setup .footer { opacity: .5; }
