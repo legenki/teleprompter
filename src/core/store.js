@@ -1,15 +1,25 @@
 import { DEFAULTS, KEYS } from './config.js';
 
+let _storage = null;
+
+export function setStorageBackend(backend) {
+  _storage = backend;
+}
+
 function safeGet(key, fallback) {
   try {
-    const v = localStorage.getItem(key);
+    const s = _storage || localStorage;
+    const v = s.getItem(key);
     return v === null ? fallback : v;
   } catch (e) { return fallback; }
 }
 
 function safeSet(key, value) {
-  try { localStorage.setItem(key, value); return true; }
-  catch (e) { return false; }
+  try {
+    const s = _storage || localStorage;
+    s.setItem(key, String(value));
+    return true;
+  } catch (e) { return false; }
 }
 
 class TeleprompterStore extends EventTarget {
