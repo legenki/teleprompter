@@ -5,12 +5,17 @@ import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/p
 const KEY = 'copilot.settings';
 const DEFAULTS = {
   provider: 'groq', groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
-  sttModel: 'onnx-community/whisper-base.en', style: 'short', resume: '', job: '',
+  sttModel: 'onnx-community/whisper-base.en', audioDevice: '', style: 'short', resume: '', job: '',
 };
 const FIELDS = Object.keys(DEFAULTS);
 const $ = (id) => document.getElementById(id);
 
+// Firefox has no tabCapture/offscreen: capture an audio input (virtual cable) and run Whisper in this page.
+const IN_PAGE = !chrome.tabCapture || new URLSearchParams(location.search).has('inpage');
+const CABLE = /blackhole|vb-?cable|cable output|loopback|monitor of|soundflower|voicemeeter/i;
+
 let settings = { ...DEFAULTS };
+let stt = null;
 let provider = null;
 let providerSig = '';
 let listening = false;
@@ -27,7 +32,42 @@ async function loadSettings() {
     for (const m of models) $(id).add(new Option(m, m));
   }
   for (const f of FIELDS) $(f).value = settings[f];
+  if (IN_PAGE) {
+    document.querySelectorAll('[data-inpage]').forEach((e) => { e.hidden = false; });
+    if (!navigator.gpu) {
+      $('provider').querySelector('option[value="local"]').remove();
+      if (settings.provider === 'local') { settings.provider = 'groq'; $('provider').value = 'groq'; }
+    }
+    await populateDevices(false);
+  }
   syncProviderFields();
+}
+
+async function populateDevices(askPermission) {
+  if (askPermission) {
+    // Labels are only exposed after the user grants audio permission once.
+    const tmp = await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => null);
+    tmp?.getTracks().forEach((t) => t.stop());
+  }
+  const devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput');
+  const sel = $('audioDevice');
+  sel.replaceChildren(new Option('Auto: BlackHole / VB-Cable / Loopback', ''));
+  for (const d of devices) sel.add(new Option(d.label || `Input ${sel.length}`, d.deviceId));
+  sel.value = devices.some((d) => d.deviceId === settings.audioDevice) ? settings.audioDevice : '';
+}
+
+async function openAudioInput() {
+  let id = settings.audioDevice;
+  if (!id) {
+    await populateDevices(true);
+    const match = [...$('audioDevice').options].find((o) => o.value && CABLE.test(o.text));
+    if (!match) throw new Error('No virtual audio cable found. Install BlackHole (macOS) or VB-Cable (Windows), route the call audio to it, then pick it in Settings.');
+    id = match.value;
+  }
+  return navigator.mediaDevices.getUserMedia({
+    // Processing must be off for a loopback source, or speech gets gated/ducked.
+    audio: { deviceId: { exact: id }, echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+  });
 }
 
 function saveSettings() {
@@ -134,8 +174,7 @@ function run(text, ui, answer, ctx) {
 }
 
 // ---------- capture ----------
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.from !== 'offscreen') return;
+function onSttEvent(msg) {
   if (msg.type === 'status') {
     listening = msg.state === 'listening';
     setStatus(msg.state, msg.detail);
@@ -149,10 +188,28 @@ chrome.runtime.onMessage.addListener((msg) => {
   } else if (msg.type === 'error') {
     setStatus('error', msg.error);
   }
+}
+
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.from === 'offscreen') onSttEvent(msg);
 });
 
 $('btn-start').onclick = async () => {
-  if ($('btn-start').classList.contains('on')) {
+  const running = $('btn-start').classList.contains('on');
+  if (IN_PAGE) {
+    if (running) { await stt?.stop(); onSttEvent({ type: 'status', state: 'idle', detail: 'Stopped' }); return; }
+    setStatus('loading', 'Starting…');
+    getProvider().ready().catch((e) => setStatus('error', e.message));
+    try {
+      stt ??= (await import('./lib/stt.js')).createStt(onSttEvent);
+      await stt.start({ model: settings.sttModel, getStream: openAudioInput });
+    } catch (e) {
+      onSttEvent({ type: 'error', error: e.message });
+      onSttEvent({ type: 'status', state: 'idle', detail: 'Stopped' });
+    }
+    return;
+  }
+  if (running) {
     await chrome.runtime.sendMessage({ target: 'background', type: 'capture:stop' });
     return;
   }
@@ -163,6 +220,7 @@ $('btn-start').onclick = async () => {
   getProvider().ready().catch((e) => setStatus('error', e.message));
 };
 
+$('btn-devices').onclick = () => populateDevices(true);
 $('btn-settings').onclick = () => { $('settings').hidden = !$('settings').hidden; };
 for (const f of FIELDS) $(f).addEventListener('change', saveSettings);
 

@@ -143,3 +143,21 @@ npm test                       # unit tests for segmentation / question detectio
 Notes: only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in
 `chrome.storage.local`. Speech and LLM models are downloaded from huggingface.co on first use.
 Check your interviewer's / employer's rules on AI assistance before using this in a real interview.
+
+### Firefox version
+
+```bash
+npm run build:firefox   # -> dist/firefox, load via about:debugging → This Firefox → Load Temporary Add-on → manifest.json
+```
+
+Firefox cannot capture tab audio, so the call audio goes through a **virtual audio cable** instead
+(BlackHole on macOS, VB-Cable on Windows, a PipeWire/Pulse monitor on Linux):
+
+1. Route the call output to the cable. On macOS create a *Multi-Output Device* (speakers + BlackHole) in
+   Audio MIDI Setup and select it as the system output, so you still hear the interviewer.
+2. Open the sidebar → **Interview mode** → Settings → **Refresh devices** (grants microphone access)
+   and pick the cable (auto-detected if its name contains BlackHole / VB-Cable / Loopback).
+3. Press **Start listening**.
+
+In Firefox speech recognition runs in the sidebar page itself (CPU unless WebGPU is available), and only the
+Groq answer engine is offered — the local WebLLM model is not bundled. Closing the sidebar stops listening.

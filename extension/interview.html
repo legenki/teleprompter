@@ -32,6 +32,10 @@
       </label>
       <label data-for="groq">Groq model <select id="groqModel"></select></label>
       <label data-for="local">Local model <select id="localModel"></select></label>
+      <label data-inpage hidden>Audio input (virtual cable)
+        <select id="audioDevice"><option value="">Auto: BlackHole / VB-Cable / Loopback</option></select>
+        <button type="button" id="btn-devices">Refresh devices</button>
+      </label>
       <label>Speech model
         <select id="sttModel">
           <option value="onnx-community/whisper-base.en">whisper-base.en (better)</option>
