@@ -139,7 +139,11 @@ npm test                       # unit tests for segmentation / question detectio
    - *Gemini* (default) — free API key from aistudio.google.com/apikey, best answer quality. On the free tier Google may use requests to improve its models.
    - *Groq* — free API key from console.groq.com, very low latency.
    - *Local WebLLM* — fully offline, needs WebGPU; weaker answers, large first download.
-3. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
+3. **Speech recognition** can be switched to *Gemini* in Settings (more accurate, uses the same Gemini key). The call audio
+   is then sent to Google, and on the free tier Google may use it to improve its models — do not enable it if that is a problem.
+   Gemini mode waits for longer pauses (fewer requests); if the quota or key fails (401/403/429) the extension falls back to
+   local Whisper automatically. Whisper stays the default.
+4. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
 
 Notes: only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in
 `chrome.storage.local`. Speech and LLM models are downloaded from huggingface.co on first use.

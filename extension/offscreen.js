@@ -9,6 +9,8 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'start') {
     stt.start({
       model: msg.model,
+      engine: msg.engine,
+      gemini: msg.gemini,
       playback: true, // capturing a tab mutes it, so play it back unchanged
       getStream: () => navigator.mediaDevices.getUserMedia({
         audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: msg.streamId } },

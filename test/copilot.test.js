@@ -100,3 +100,38 @@ test('toGeminiBody maps system/user/assistant and disables thinking', () => {
   assert.equal(b.generationConfig.thinkingConfig.thinkingBudget, 0);
   assert.equal(toGeminiBody([{ role: 'user', content: 'x' }]).systemInstruction, undefined);
 });
+
+import { floatToWav, toBase64, buildTranscribeBody, isFatalGeminiError } from '../extension/lib/gemini-stt.js';
+
+test('floatToWav writes a valid 16 kHz mono PCM header', () => {
+  const wav = floatToWav(Float32Array.from([0, 1, -1, 0.5]), 16000);
+  const v = new DataView(wav.buffer);
+  assert.equal(String.fromCharCode(...wav.slice(0, 4)), 'RIFF');
+  assert.equal(String.fromCharCode(...wav.slice(8, 12)), 'WAVE');
+  assert.equal(v.getUint32(24, true), 16000);
+  assert.equal(v.getUint16(22, true), 1);
+  assert.equal(v.getUint32(40, true), 8);
+  assert.equal(wav.length, 44 + 8);
+  assert.equal(v.getInt16(46, true), 32767);
+  assert.equal(v.getInt16(48, true), -32768);
+});
+
+test('toBase64 handles large buffers', () => {
+  const big = new Uint8Array(200000).fill(65);
+  assert.equal(Buffer.from(toBase64(big), 'base64').length, 200000);
+});
+
+test('buildTranscribeBody embeds audio, hint and previous sentence', () => {
+  const b = buildTranscribeBody(new Float32Array(160), { hint: 'Kubernetes, gRPC', previous: 'Tell me more.' });
+  const [audio, text] = b.contents[0].parts;
+  assert.equal(audio.inlineData.mimeType, 'audio/wav');
+  assert.match(text.text, /Kubernetes/);
+  assert.match(text.text, /Tell me more/);
+  assert.equal(b.generationConfig.temperature, 0);
+});
+
+test('isFatalGeminiError', () => {
+  assert.equal(isFatalGeminiError({ status: 429 }), true);
+  assert.equal(isFatalGeminiError({ status: 500 }), false);
+  assert.equal(isFatalGeminiError(new Error('network')), false);
+});

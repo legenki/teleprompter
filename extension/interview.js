@@ -5,7 +5,7 @@ import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/p
 const KEY = 'copilot.settings';
 const DEFAULTS = {
   provider: 'gemini', geminiKey: '', geminiModel: GEMINI_MODELS[0], groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
-  sttModel: 'onnx-community/whisper-base.en', audioDevice: '', style: 'short', resume: '', job: '',
+  sttModel: 'onnx-community/whisper-base.en', sttEngine: 'whisper', audioDevice: '', style: 'short', resume: '', job: '',
 };
 const FIELDS = Object.keys(DEFAULTS);
 const $ = (id) => document.getElementById(id);
@@ -78,8 +78,19 @@ function saveSettings() {
 
 function syncProviderFields() {
   document.querySelectorAll('[data-for]').forEach((el) => {
-    el.hidden = el.dataset.for !== $('provider').value;
+    const gemini = el.dataset.for === 'gemini' && $('sttEngine').value === 'gemini';
+    el.hidden = el.dataset.for !== $('provider').value && !gemini;
   });
+}
+
+function sttConfig() {
+  const engine = settings.sttEngine;
+  if (engine === 'gemini' && !settings.geminiKey) throw new Error('Add a Gemini API key in settings to use Gemini speech recognition.');
+  return {
+    model: settings.sttModel,
+    engine,
+    gemini: { key: settings.geminiKey, model: settings.geminiModel, hint: settings.job.slice(0, 600) },
+  };
 }
 
 function getProvider() {
@@ -136,11 +147,12 @@ function render(ui, parsed) {
 }
 
 // ---------- pipeline ----------
-function handleLine(text) {
+function handleLine(text, sttMs) {
   const isQ = isQuestion(text);
   const ui = addCard(text, isQ);
   const ctx = history.slice(-3);
   history.push(text);
+  ui.sttMs = sttMs;
   lastLine = { text, ui, ctx };
   run(text, ui, isQ, ctx);
 }
@@ -163,7 +175,7 @@ function run(text, ui, answer, ctx) {
         signal: ac.signal,
         onToken: (full) => render(ui, answer ? parseReply(full) : { ru: full.replace(/^\s*RU:\s*/i, ''), key: [], answers: [] }),
       });
-      ui.meta.textContent = `LLM ${((performance.now() - t0) / 1000).toFixed(1)}s`;
+      ui.meta.textContent = `${ui.sttMs != null ? `STT ${(ui.sttMs / 1000).toFixed(1)}s · ` : ''}LLM ${((performance.now() - t0) / 1000).toFixed(1)}s`;
       if (listening) setStatus('listening', 'Listening…');
     } catch (e) {
       if (ac.signal.aborted) { ui.ru.textContent = ui.ru.textContent === '…' ? '(superseded by a newer question)' : ui.ru.textContent; return; }
@@ -182,7 +194,7 @@ function onSttEvent(msg) {
     $('btn-start').classList.toggle('on', listening || msg.state === 'loading');
     if (msg.state === 'idle') $('level').style.width = '0';
   } else if (msg.type === 'text') {
-    handleLine(msg.text);
+    handleLine(msg.text, msg.sttMs);
   } else if (msg.type === 'level') {
     $('level').style.width = `${Math.round(msg.level * 100)}%`;
   } else if (msg.type === 'error') {
@@ -202,7 +214,7 @@ $('btn-start').onclick = async () => {
     getProvider().ready().catch((e) => setStatus('error', e.message));
     try {
       stt ??= (await import('./lib/stt.js')).createStt(onSttEvent);
-      await stt.start({ model: settings.sttModel, getStream: openAudioInput });
+      await stt.start({ ...sttConfig(), getStream: openAudioInput });
     } catch (e) {
       onSttEvent({ type: 'error', error: e.message });
       onSttEvent({ type: 'status', state: 'idle', detail: 'Stopped' });
@@ -214,7 +226,12 @@ $('btn-start').onclick = async () => {
     return;
   }
   setStatus('loading', 'Starting…');
-  const res = await chrome.runtime.sendMessage({ target: 'background', type: 'capture:start', model: settings.sttModel });
+  let res;
+  try {
+    res = await chrome.runtime.sendMessage({ target: 'background', type: 'capture:start', ...sttConfig() });
+  } catch (e) {
+    res = { ok: false, error: e.message };
+  }
   if (!res?.ok) setStatus('error', res?.error || 'Failed to start');
   // Warm the answer engine while the speech model loads.
   getProvider().ready().catch((e) => setStatus('error', e.message));

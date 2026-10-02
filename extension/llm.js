@@ -1,3 +1,5 @@
+import { geminiUrl } from './lib/gemini.js';
+
 // Streaming chat providers. Both expose: stream(messages, { onToken, signal }) -> full text.
 
 export const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
@@ -39,7 +41,7 @@ class GeminiProvider {
   }
 
   async stream(messages, { onToken, signal } = {}) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(this.model)}:streamGenerateContent?alt=sse`;
+    const url = `${geminiUrl(this.model, 'streamGenerateContent')}?alt=sse`;
     const res = await fetch(url, {
       method: 'POST',
       signal,

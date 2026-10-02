@@ -3,6 +3,7 @@
 import { env, pipeline } from '@huggingface/transformers';
 import { Segmenter } from './segmenter.js';
 import { isNoise } from './question.js';
+import { geminiTranscribe, isFatalGeminiError } from './gemini-stt.js';
 
 env.allowLocalModels = false;
 env.useWasmCache = false; // wasm is bundled in the extension; the Cache API rejects extension URLs
@@ -22,6 +23,9 @@ export function createStt(send) {
   let segmenter = null;
   let queue = Promise.resolve();
   let pendingJobs = 0;
+  let cfg = { engine: 'whisper', model: '', gemini: null };
+  let geminiOff = false;
+  let previous = '';
 
   async function loadModel(model) {
     if (transcriber && loadedModel === model) return;
@@ -53,14 +57,38 @@ export function createStt(send) {
     loadedModel = model;
   }
 
+  async function whisperText(samples) {
+    await loadModel(cfg.model);
+    const result = await transcriber(samples, { chunk_length_s: 30 });
+    return (result.text || '').trim();
+  }
+
+  async function recognize(samples) {
+    if (cfg.engine === 'gemini' && !geminiOff) {
+      try {
+        return await geminiTranscribe(samples, cfg.gemini, previous);
+      } catch (e) {
+        if (isFatalGeminiError(e)) {
+          geminiOff = true;
+          send({ type: 'status', state: 'loading', detail: `Gemini unavailable (${e.status}), switching to local Whisper…` });
+          const text = await whisperText(samples);
+          send({ type: 'status', state: 'listening', detail: 'Listening (local Whisper fallback)…' });
+          return text;
+        }
+        send({ type: 'error', error: `Gemini: ${e.message} (this phrase used local Whisper)` });
+      }
+    }
+    return whisperText(samples);
+  }
+
   function transcribe(samples, durationMs) {
     pendingJobs++;
     queue = queue.then(async () => {
       try {
         const t0 = performance.now();
-        const result = await transcriber(samples, { chunk_length_s: 30 });
-        const text = (result.text || '').trim();
+        const text = await recognize(samples);
         if (!isNoise(text)) {
+          previous = text;
           send({ type: 'text', text, audioMs: durationMs, sttMs: Math.round(performance.now() - t0) });
         }
       } catch (e) {
@@ -82,9 +110,14 @@ export function createStt(send) {
   }
 
   // getStream: () => Promise<MediaStream>. playback: replay the stream (needed for muted tab capture).
-  async function start({ getStream, model, playback = false }) {
+  // engine: 'whisper' | 'gemini'. With gemini, Whisper is only loaded if Gemini fails.
+  async function start({ getStream, model, playback = false, engine = 'whisper', gemini = null }) {
     await stop();
-    await loadModel(model);
+    if (engine === 'gemini' && !gemini?.key) throw new Error('Add a Gemini API key in settings to use Gemini speech recognition.');
+    cfg = { engine, model, gemini };
+    geminiOff = false;
+    previous = '';
+    if (engine === 'whisper') await loadModel(model);
     stream = await getStream();
 
     if (playback) {
@@ -97,7 +130,9 @@ export function createStt(send) {
     const node = new AudioWorkletNode(analysisCtx, 'pcm-forwarder');
     analysisCtx.createMediaStreamSource(stream).connect(node);
 
+    // Gemini costs one request per utterance: wait for longer pauses to send whole questions.
     segmenter = new Segmenter({
+      ...(engine === 'gemini' && { silenceMs: 1100, maxUtteranceMs: 25000 }),
       onUtterance: ({ samples, durationMs }) => transcribe(samples, durationMs),
     });
 
