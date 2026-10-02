@@ -1,10 +1,10 @@
-import { createProvider, GROQ_MODELS, LOCAL_MODELS } from './llm.js';
+import { createProvider, GEMINI_MODELS, GROQ_MODELS, LOCAL_MODELS } from './llm.js';
 import { isQuestion } from './lib/question.js';
 import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/prompt.js';
 
 const KEY = 'copilot.settings';
 const DEFAULTS = {
-  provider: 'groq', groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
+  provider: 'gemini', geminiKey: '', geminiModel: GEMINI_MODELS[0], groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
   sttModel: 'onnx-community/whisper-base.en', audioDevice: '', style: 'short', resume: '', job: '',
 };
 const FIELDS = Object.keys(DEFAULTS);
@@ -28,7 +28,7 @@ let chain = Promise.resolve();
 async function loadSettings() {
   const stored = (await chrome.storage.local.get(KEY))[KEY] || {};
   settings = { ...DEFAULTS, ...stored };
-  for (const [id, models] of [['groqModel', GROQ_MODELS], ['localModel', LOCAL_MODELS]]) {
+  for (const [id, models] of [['geminiModel', GEMINI_MODELS], ['groqModel', GROQ_MODELS], ['localModel', LOCAL_MODELS]]) {
     for (const m of models) $(id).add(new Option(m, m));
   }
   for (const f of FIELDS) $(f).value = settings[f];
@@ -36,7 +36,7 @@ async function loadSettings() {
     document.querySelectorAll('[data-inpage]').forEach((e) => { e.hidden = false; });
     if (!navigator.gpu) {
       $('provider').querySelector('option[value="local"]').remove();
-      if (settings.provider === 'local') { settings.provider = 'groq'; $('provider').value = 'groq'; }
+      if (settings.provider === 'local') { settings.provider = 'gemini'; $('provider').value = 'gemini'; }
     }
     await populateDevices(false);
   }
@@ -83,7 +83,7 @@ function syncProviderFields() {
 }
 
 function getProvider() {
-  const sig = JSON.stringify([settings.provider, settings.groqKey, settings.groqModel, settings.localModel]);
+  const sig = JSON.stringify([settings.provider, settings.geminiKey, settings.geminiModel, settings.groqKey, settings.groqModel, settings.localModel]);
   if (!provider || sig !== providerSig) {
     provider = createProvider(settings, (t) => setStatus('loading', t));
     providerSig = sig;

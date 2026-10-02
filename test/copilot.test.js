@@ -86,3 +86,17 @@ test('buildAnswerMessages embeds resume and history', () => {
   assert.match(m[1].content, /h1/);
   assert.match(m[1].content, /Q\?/);
 });
+
+import { toGeminiBody } from '../extension/llm.js';
+
+test('toGeminiBody maps system/user/assistant and disables thinking', () => {
+  const b = toGeminiBody([
+    { role: 'system', content: 'SYS' },
+    { role: 'user', content: 'Q' },
+    { role: 'assistant', content: 'A' },
+  ]);
+  assert.equal(b.systemInstruction.parts[0].text, 'SYS');
+  assert.deepEqual(b.contents.map((c) => c.role), ['user', 'model']);
+  assert.equal(b.generationConfig.thinkingConfig.thinkingBudget, 0);
+  assert.equal(toGeminiBody([{ role: 'user', content: 'x' }]).systemInstruction, undefined);
+});

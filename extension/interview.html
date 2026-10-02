@@ -23,10 +23,15 @@
     <section id="settings" class="settings" hidden>
       <label>Answer engine
         <select id="provider">
+          <option value="gemini">Gemini (free key, best quality)</option>
           <option value="groq">Groq (free key, fast, best quality)</option>
           <option value="local">Local WebLLM (offline, needs WebGPU)</option>
         </select>
       </label>
+      <label data-for="gemini">Gemini API key
+        <input id="geminiKey" type="password" placeholder="AIza..." autocomplete="off">
+      </label>
+      <label data-for="gemini">Gemini model <select id="geminiModel"></select></label>
       <label data-for="groq">Groq API key
         <input id="groqKey" type="password" placeholder="gsk_..." autocomplete="off">
       </label>

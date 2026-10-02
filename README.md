@@ -136,7 +136,8 @@ npm test                       # unit tests for segmentation / question detectio
 
 1. Open the call tab, click the extension icon (this grants tab-capture access), open **Interview mode**.
 2. **Settings**: pick the answer engine, paste your resume and the vacancy, then press **Start listening**.
-   - *Groq* — free API key from console.groq.com, fastest and best answers.
+   - *Gemini* (default) — free API key from aistudio.google.com/apikey, best answer quality. On the free tier Google may use requests to improve its models.
+   - *Groq* — free API key from console.groq.com, very low latency.
    - *Local WebLLM* — fully offline, needs WebGPU; weaker answers, large first download.
 3. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
 
@@ -160,4 +161,4 @@ Firefox cannot capture tab audio, so the call audio goes through a **virtual aud
 3. Press **Start listening**.
 
 In Firefox speech recognition runs in the sidebar page itself (CPU unless WebGPU is available), and only the
-Groq answer engine is offered — the local WebLLM model is not bundled. Closing the sidebar stops listening.
+Gemini and Groq answer engines are offered — the local WebLLM model is not bundled. Closing the sidebar stops listening.
