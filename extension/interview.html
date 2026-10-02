@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Interview Copilot</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="interview.css">
+  </head>
+  <body>
+    <header>
+      <div class="row">
+        <strong>Interview Copilot</strong>
+        <span id="status" class="status" aria-live="polite">Idle</span>
+        <a href="sidebar.html" class="link" title="Back to teleprompter">Teleprompter</a>
+      </div>
+      <div class="row">
+        <button id="btn-start" class="primary">Start listening</button>
+        <button id="btn-settings" title="Settings">Settings</button>
+        <div class="meter" title="Audio level"><div id="level"></div></div>
+      </div>
+    </header>
+
+    <section id="settings" class="settings" hidden>
+      <label>Answer engine
+        <select id="provider">
+          <option value="groq">Groq (free key, fast, best quality)</option>
+          <option value="local">Local WebLLM (offline, needs WebGPU)</option>
+        </select>
+      </label>
+      <label data-for="groq">Groq API key
+        <input id="groqKey" type="password" placeholder="gsk_..." autocomplete="off">
+      </label>
+      <label data-for="groq">Groq model <select id="groqModel"></select></label>
+      <label data-for="local">Local model <select id="localModel"></select></label>
+      <label>Speech model
+        <select id="sttModel">
+          <option value="onnx-community/whisper-base.en">whisper-base.en (better)</option>
+          <option value="onnx-community/whisper-tiny.en">whisper-tiny.en (faster)</option>
+        </select>
+      </label>
+      <label>Answer length
+        <select id="style">
+          <option value="short">1 sentence</option>
+          <option value="medium">1-2 sentences</option>
+        </select>
+      </label>
+      <label>Your resume
+        <textarea id="resume" rows="6" placeholder="Paste your resume / key experience"></textarea>
+      </label>
+      <label>Job description
+        <textarea id="job" rows="4" placeholder="Paste the vacancy text"></textarea>
+      </label>
+      <p class="hint">Settings (including the API key) are stored in this browser profile only.</p>
+    </section>
+
+    <main id="feed" aria-live="polite">
+      <p id="empty" class="empty">Open your call tab, click the extension icon there, then press <b>Start listening</b>.
+        The interviewer's speech appears here with a Russian translation and short answer options.</p>
+    </main>
+
+    <footer>
+      <form id="manual">
+        <input id="manual-input" type="text" placeholder="Type a question to test (Enter)…" autocomplete="off">
+        <button type="submit">Ask</button>
+        <button type="button" id="btn-last" title="Suggest answers for the last interviewer line">Answer last</button>
+      </form>
+    </footer>
+
+    <script type="module" src="interview.js"></script>
+  </body>
+</html>

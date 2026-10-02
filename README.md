@@ -120,3 +120,26 @@ MIT — see [LICENSE](LICENSE).
 
 Original work © Peter Schmalfeldt ([manifestinteractive/teleprompter](https://github.com/manifestinteractive/teleprompter)).
 This fork by [Andy Legenki](https://github.com/legenki).
+
+## Interview Copilot (Chrome extension)
+
+The extension has an **Interview mode** (link in the side panel header). It listens to the audio of the
+current browser tab (Google Meet, Zoom Web, Teams Web…), transcribes it locally with Whisper, translates
+the interviewer's speech to Russian and suggests 3 short English answers plus key points, based on your
+resume and the job description.
+
+```bash
+npm install --ignore-scripts   # onnxruntime-node's postinstall is not needed in the browser
+npm run build:ext              # then load dist/extension via chrome://extensions → Load unpacked
+npm test                       # unit tests for segmentation / question detection / prompt parsing
+```
+
+1. Open the call tab, click the extension icon (this grants tab-capture access), open **Interview mode**.
+2. **Settings**: pick the answer engine, paste your resume and the vacancy, then press **Start listening**.
+   - *Groq* — free API key from console.groq.com, fastest and best answers.
+   - *Local WebLLM* — fully offline, needs WebGPU; weaker answers, large first download.
+3. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
+
+Notes: only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in
+`chrome.storage.local`. Speech and LLM models are downloaded from huggingface.co on first use.
+Check your interviewer's / employer's rules on AI assistance before using this in a real interview.

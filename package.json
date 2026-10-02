@@ -32,13 +32,16 @@
     "lint:fix": "eslint --ext .js . --fix",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",
-    "dev:web":   "vite --config vite.config.web.js",
-    "dev:ext":   "vite build --config vite.config.ext.js --watch",
+    "dev:web": "vite --config vite.config.web.js",
+    "dev:ext": "vite build --config vite.config.ext.js --watch",
     "build:web": "vite build --config vite.config.web.js",
     "build:ext": "vite build --config vite.config.ext.js",
-    "build":     "npm run build:web && npm run build:ext"
+    "build": "npm run build:web && npm run build:ext",
+    "test": "node --test test/copilot.test.js"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.3.0",
+    "@mlc-ai/web-llm": "^0.2.85",
     "express": "^4.18.2",
     "jquery": "^4.0.0",
     "socket.io": "^4.5.4"
