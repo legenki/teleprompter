@@ -4,112 +4,134 @@
     <meta charset="utf-8">
     <title>Interview Copilot</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="interview.css">
   </head>
   <body>
-    <header>
-      <div class="row">
-        <strong>Interview Copilot</strong>
-        <span id="status" class="status" aria-live="polite">Idle</span>
-        <a href="sidebar.html" class="link" title="Back to teleprompter">Teleprompter</a>
-      </div>
-      <div class="row">
-        <button id="btn-start" class="primary">Start listening</button>
-        <button id="btn-settings" title="Settings">Settings</button>
-        <div class="meter" title="Audio level"><div id="level"></div></div>
-      </div>
-      <div class="row langs">
-        <label>Interviewer
-          <select id="interviewerLang">
-            <option value="en">English</option>
-            <option value="es">Español</option>
-          </select>
-        </label>
-        <label>Answers
-          <select id="answerLang">
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="ru">Русский</option>
-          </select>
-        </label>
-      </div>
-    </header>
+    <div class="app">
+      <header class="bar">
+        <div class="brand">
+          <span class="dot" id="dot" data-state="idle"></span>
+          <div>
+            <h1>Interview Copilot</h1>
+            <p id="status" class="status" aria-live="polite">Idle</p>
+          </div>
+        </div>
+        <div class="bar-actions">
+          <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings" aria-controls="drawer" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+          </button>
+          <button id="btn-start" class="btn" type="button">Start</button>
+        </div>
+        <div class="level" aria-hidden="true"><i id="level"></i></div>
+      </header>
 
-    <section id="settings" class="settings" hidden>
-      <label>Answer engine
-        <select id="provider">
-          <option value="gemini">Gemini (free key, best quality)</option>
-          <option value="groq">Groq (free key, fast, best quality)</option>
-          <option value="local">Local WebLLM (offline, needs WebGPU)</option>
-        </select>
-      </label>
-      <label data-for="gemini">Gemini API key
-        <input id="geminiKey" type="password" placeholder="AIza..." autocomplete="off">
-      </label>
-      <label data-for="gemini">Gemini model <select id="geminiModel"></select></label>
-      <label data-for="groq">Groq API key
-        <input id="groqKey" type="password" placeholder="gsk_..." autocomplete="off">
-      </label>
-      <label data-for="groq">Groq model <select id="groqModel"></select></label>
-      <label data-for="local">Local model <select id="localModel"></select></label>
-      <label data-inpage hidden>Audio source
-        <select id="audioDevice"><option value="">Auto: BlackHole / VB-Cable / Loopback</option></select>
-        <button type="button" id="btn-devices">Refresh devices</button>
-      </label>
-      <label>Speech recognition
-        <select id="sttEngine">
-          <option value="whisper">Local Whisper (private, offline)</option>
-          <option value="gemini">Gemini (more accurate; audio is sent to Google)</option>
-        </select>
-      </label>
-      <label>Local speech model size (also the fallback)
-        <select id="sttModel">
-          <option value="tiny">tiny (fastest, least accurate)</option>
-          <option value="base">base (balanced)</option>
-          <option value="small">small (most accurate, slow on CPU)</option>
-        </select>
-      </label>
-      <fieldset class="phone">
-        <legend>Phone display (second screen)</legend>
-        <label>Show cards on phone
-          <select id="phoneEnabled"><option value="off">Off</option><option value="on">On</option></select>
-        </label>
-        <label>Relay address
-          <input id="phoneRelay" type="text" placeholder="localhost:3100" autocomplete="off">
-        </label>
-        <label>Pairing token
-          <input id="phoneToken" type="password" placeholder="printed by npm run phone" autocomplete="off">
-        </label>
-        <p class="hint" id="phone-status">Run <code>npm run phone</code> on this computer, then open the printed link on your phone.</p>
-      </fieldset>
-      <label>Answer length
-        <select id="style">
-          <option value="short">1 sentence</option>
-          <option value="medium">1-2 sentences</option>
-        </select>
-      </label>
-      <label>Your resume
-        <textarea id="resume" rows="6" placeholder="Paste your resume / key experience"></textarea>
-      </label>
-      <label>Job description
-        <textarea id="job" rows="4" placeholder="Paste the vacancy text"></textarea>
-      </label>
-      <p class="hint">Settings (including the API key) are stored in this browser profile only.</p>
-    </section>
+      <div class="langs">
+        <div class="field">
+          <span class="label">Interviewer</span>
+          <div class="seg" role="radiogroup" aria-label="Interviewer language" data-field="interviewerLang">
+            <i class="seg-thumb"></i>
+            <button type="button" role="radio" data-value="en">EN</button>
+            <button type="button" role="radio" data-value="es">ES</button>
+          </div>
+        </div>
+        <svg class="arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <div class="field">
+          <span class="label">Answers</span>
+          <div class="seg" role="radiogroup" aria-label="Answer language" data-field="answerLang">
+            <i class="seg-thumb"></i>
+            <button type="button" role="radio" data-value="en">EN</button>
+            <button type="button" role="radio" data-value="es">ES</button>
+            <button type="button" role="radio" data-value="ru">RU</button>
+          </div>
+        </div>
+      </div>
 
-    <main id="feed" aria-live="polite">
-      <p id="empty" class="empty">Open your call tab, click the extension icon there, then press <b>Start listening</b>.
-        The interviewer's speech appears here with a Russian translation and short answer options.</p>
-    </main>
+      <main id="feed">
+        <div id="empty" class="empty">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+          <ol id="empty-steps"></ol>
+        </div>
+      </main>
+    </div>
 
-    <footer>
-      <form id="manual">
-        <input id="manual-input" type="text" placeholder="Type a question to test (Enter)…" autocomplete="off">
-        <button type="submit">Ask</button>
-        <button type="button" id="btn-last" title="Suggest answers for the last interviewer line">Answer last</button>
-      </form>
-    </footer>
+    <div id="scrim" class="scrim" hidden></div>
+    <aside id="drawer" class="drawer" aria-label="Settings" inert>
+      <div class="drawer-head">
+        <h2>Settings</h2>
+        <button id="btn-close" class="icon-btn" type="button" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <section>
+          <h3>Gemini</h3>
+          <label class="row-field">
+            <span class="label">API key</span>
+            <input id="geminiKey" type="password" placeholder="AIza…" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="row-field">
+            <span class="label">Model</span>
+            <select id="geminiModel"></select>
+          </label>
+          <p class="hint">Free key at aistudio.google.com/apikey. Stored in this browser only.</p>
+        </section>
+
+        <section>
+          <h3>Speech recognition</h3>
+          <div class="seg seg-wide" role="radiogroup" aria-label="Speech recognition engine" data-field="sttEngine">
+            <i class="seg-thumb"></i>
+            <button type="button" role="radio" data-value="whisper">On-device</button>
+            <button type="button" role="radio" data-value="gemini">Gemini</button>
+          </div>
+          <div class="reveal" id="stt-note"><div><p class="hint warn">Call audio is sent to Google for transcription. On the free tier Google may use it to improve its products. Falls back to on-device automatically if the quota runs out.</p></div></div>
+          <label class="row-field reveal-inpage" data-inpage hidden>
+            <span class="label">Audio source</span>
+            <span class="with-btn">
+              <select id="audioDevice"><option value="">Auto: virtual cable</option></select>
+              <button id="btn-devices" class="icon-btn" type="button" aria-label="Detect audio devices" title="Detect audio devices">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></svg>
+              </button>
+            </span>
+          </label>
+        </section>
+
+        <section>
+          <h3>Context</h3>
+          <label class="row-field stack">
+            <span class="label">Resume</span>
+            <textarea id="resume" rows="6" placeholder="Paste your resume or key experience"></textarea>
+          </label>
+          <label class="row-field stack">
+            <span class="label">Job description</span>
+            <textarea id="job" rows="4" placeholder="Paste the vacancy text"></textarea>
+          </label>
+        </section>
+
+        <section>
+          <div class="section-head">
+            <h3>Phone display</h3>
+            <label class="switch" aria-label="Show cards on phone">
+              <input id="phoneEnabled" type="checkbox">
+              <span></span>
+            </label>
+          </div>
+          <div class="reveal" id="phone-fields"><div>
+            <label class="row-field">
+              <span class="label">Relay</span>
+              <input id="phoneRelay" type="text" placeholder="localhost:3100" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="row-field">
+              <span class="label">Token</span>
+              <input id="phoneToken" type="password" placeholder="from npm run phone" autocomplete="off" spellcheck="false">
+            </label>
+            <p class="hint" id="phone-status">Run <code>npm run phone</code>, then open the printed link on your phone.</p>
+          </div></div>
+        </section>
+      </div>
+    </aside>
 
     <script type="module" src="interview.js"></script>
   </body>

@@ -123,35 +123,28 @@ This fork by [Andy Legenki](https://github.com/legenki).
 
 ## Interview Copilot (Chrome extension)
 
-The extension has an **Interview mode** (link in the side panel header). It listens to the audio of the
-current browser tab (Google Meet, Zoom Web, Teams Web…), transcribes it locally with Whisper, translates
-the interviewer's speech to Russian and suggests 3 short English answers plus key points, based on your
-resume and the job description.
+The extension opens a side panel that listens to the audio of the current browser tab (Google Meet, Zoom Web, Teams Web…),
+transcribes it, shows a Russian translation of what the interviewer says and suggests 3 short answers plus key points, based on
+your resume and the job description. Answers come from Gemini; speech recognition runs on-device (Whisper) or through Gemini.
 
 ```bash
 npm install --ignore-scripts   # onnxruntime-node's postinstall is not needed in the browser
 npm run build:ext              # then load dist/extension via chrome://extensions → Load unpacked
-npm test                       # unit tests for segmentation / question detection / prompt parsing
+npm test                       # unit tests for segmentation / question detection / prompts / phone relay
 ```
 
-1. Open the call tab, click the extension icon (this grants tab-capture access), open **Interview mode**.
-2. **Settings**: pick the answer engine, paste your resume and the vacancy, then press **Start listening**.
-   - *Gemini* (default) — free API key from aistudio.google.com/apikey, best answer quality. On the free tier Google may use requests to improve its models.
-   - *Groq* — free API key from console.groq.com, very low latency.
-   - *Local WebLLM* — fully offline, needs WebGPU; weaker answers, large first download.
-3. **Speech recognition** can be switched to *Gemini* in Settings (more accurate, uses the same Gemini key). The call audio
-   is then sent to Google, and on the free tier Google may use it to improve its models — do not enable it if that is a problem.
-   Gemini mode waits for longer pauses (fewer requests); if the quota or key fails (401/403/429) the extension falls back to
-   local Whisper automatically. Whisper stays the default.
-4. **Languages.** Two selectors in the panel header: *Interviewer* (English / Español) and *Answers* (English / Español /
-   Русский). The Russian translation line is always shown. Changing the interviewer language while listening stops it; press
-   Start again. For Spanish the multilingual Whisper models are used (`base` makes noticeable mistakes, `small` is accurate but
-   several times slower on CPU; Gemini recognition handles Spanish best). Whisper runs in a Web Worker, so the UI stays responsive.
-5. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
+1. Open the call tab, click the extension icon on it (this grants tab-capture access) and press **Start**.
+2. **Settings** (top right): paste a free Gemini API key (aistudio.google.com/apikey), your resume and the vacancy.
+3. **Languages** are two switches under the header: *Interviewer* (EN / ES) and *Answers* (EN / ES / RU). The Russian
+   translation line is always shown. Changing the interviewer language while listening stops it; press Start again.
+   Spanish uses the multilingual Whisper `small` model (more accurate, slower on CPU) and English uses `base`.
+4. **Speech recognition → Gemini** is more accurate but sends the call audio to Google (on the free tier Google may use it to
+   improve its products). It waits for longer pauses to save quota and falls back to on-device Whisper automatically on
+   401/403/429. On-device stays the default. Whisper runs in a Web Worker, so the UI never freezes.
+5. Click an answer to copy it. The light or dark theme follows the system.
 
-Notes: only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in
-`chrome.storage.local`. Speech and LLM models are downloaded from huggingface.co on first use.
-Check your interviewer's / employer's rules on AI assistance before using this in a real interview.
+Only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in `chrome.storage.local`. Whisper
+models are downloaded from huggingface.co on first use. Check the interviewer's / employer's rules on AI assistance first.
 
 ### Firefox version
 
@@ -159,17 +152,16 @@ Check your interviewer's / employer's rules on AI assistance before using this i
 npm run build:firefox   # -> dist/firefox, load via about:debugging → This Firefox → Load Temporary Add-on → manifest.json
 ```
 
-Firefox cannot capture tab audio, so the call audio goes through a **virtual audio cable** instead
+Firefox cannot capture tab audio, so the call audio goes through a **virtual audio cable**
 (BlackHole on macOS, VB-Cable on Windows, a PipeWire/Pulse monitor on Linux):
 
 1. Route the call output to the cable. On macOS create a *Multi-Output Device* (speakers + BlackHole) in
    Audio MIDI Setup and select it as the system output, so you still hear the interviewer.
-2. Open the sidebar → **Interview mode** → Settings → **Refresh devices** (grants microphone access)
-   and pick the cable (auto-detected if its name contains BlackHole / VB-Cable / Loopback).
-3. Press **Start listening**.
+2. Open the sidebar → Settings → *Audio source* → the refresh icon (grants microphone access) and pick the cable
+   (auto-detected if its name contains BlackHole / VB-Cable / Loopback).
+3. Press **Start**.
 
-In Firefox speech recognition runs in the sidebar page itself (CPU unless WebGPU is available), and only the
-Gemini and Groq answer engines are offered — the local WebLLM model is not bundled. Closing the sidebar stops listening.
+In Firefox speech recognition runs in the sidebar page itself (CPU unless WebGPU is available). Closing the sidebar stops listening.
 
 ### Phone as a second screen (iPhone / any phone browser)
 
@@ -180,7 +172,7 @@ phone shows the Russian translation, key points and answer options.
 npm run phone     # on the computer running the extension; prints a pairing token and phone links
 ```
 
-1. Extension → Settings → **Phone display**: switch *On*, relay `localhost:3100`, paste the token.
+1. Extension → Settings → **Phone display**: switch it on, relay `localhost:3100`, paste the token.
 2. On the phone (same Wi-Fi) open the `http://<computer-ip>:3100/?t=<token>` link printed by the command.
    Newest card is on top; `A−/A+` change the text size. The page reconnects by itself and replays recent cards.
 3. Set the phone's Auto-Lock to *Never* while interviewing (Settings → Display & Brightness). Browsers only
@@ -200,8 +192,8 @@ npm run build:interview     # -> dist/interview-web (static; any HTTPS host or l
 
 - **Deploy:** repo *Settings → Pages → Source: GitHub Actions*, then merge to `master` (or run the *Deploy site to GitHub Pages*
   workflow). The workflow also republishes the existing site from the repo root, so nothing there changes.
-- **Audio:** in Chrome / Edge on desktop choose **Browser tab audio**: pressing Start opens the share picker; pick the call tab
-  and tick *Also share tab audio*. Other browsers use a virtual cable / microphone as in the Firefox version.
+- **Audio:** in Chrome / Edge on desktop choose *Settings → Audio source → Browser tab audio*: pressing Start opens the share
+  picker; pick the call tab and tick *Also share tab audio*. Other browsers use a virtual cable as in the Firefox version.
 - Settings, the API key and the resume are kept in this browser's `localStorage`. **Every project site under the same
   `<user>.github.io` shares one origin and can read them** — only host this next to pages you fully trust, or use a custom domain.
 - The phone relay (`npm run phone`) is plain `ws://`, which an HTTPS page cannot connect to from another device; keep using

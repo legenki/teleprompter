@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Teleprompter",
+  "name": "Interview Copilot",
   "version": "1.1.0",
-  "description": "Teleprompter and interview copilot: live call transcription, Russian translation and short answer suggestions.",
+  "description": "Live call transcription, Russian translation and short answer suggestions for interviews.",
   "permissions": [
     "sidePanel",
     "storage",
@@ -12,13 +12,13 @@
     "offscreen"
   ],
   "side_panel": {
-    "default_path": "sidebar.html"
+    "default_path": "interview.html"
   },
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Open Teleprompter",
+    "default_title": "Open Interview Copilot",
     "default_icon": {
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",
@@ -34,8 +34,6 @@
     "https://huggingface.co/*",
     "https://*.huggingface.co/*",
     "https://*.hf.co/*",
-    "https://raw.githubusercontent.com/*",
-    "https://api.groq.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "content_security_policy": {

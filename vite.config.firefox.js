@@ -12,10 +12,9 @@ function copyExtensionStatics() {
       const out = 'dist/firefox';
       mkdirSync(`${out}/icons`, { recursive: true });
       mkdirSync(`${out}/ort`, { recursive: true });
-      for (const f of ['sidebar.html', 'fullscreen.html', 'sidebar.css', 'interview.html', 'interview.css', 'pcm-worklet.js']) {
+      for (const f of ['interview.html', 'interview.css', 'pcm-worklet.js']) {
         copyFileSync(`extension/${f}`, `${out}/${f}`);
       }
-      copyFileSync('src/styles/app.css', `${out}/app.css`);
       copyFileSync('extension/manifest.firefox.json', `${out}/manifest.json`);
       for (const s of [16, 48, 128]) copyFileSync(`extension/icons/icon-${s}.png`, `${out}/icons/icon-${s}.png`);
       for (const f of ORT_FILES) copyFileSync(`node_modules/onnxruntime-web/dist/${f}`, `${out}/ort/${f}`);
@@ -26,9 +25,6 @@ function copyExtensionStatics() {
 }
 
 export default defineConfig({
-  resolve: {
-    alias: { '@mlc-ai/web-llm': resolve(__dirname, 'extension/stubs/web-llm.js') },
-  },
   worker: { format: 'es' },
   build: {
     target: 'esnext',
@@ -36,8 +32,6 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        sidebar:    resolve(__dirname, 'extension/sidebar.js'),
-        fullscreen: resolve(__dirname, 'extension/fullscreen.js'),
         interview:  resolve(__dirname, 'extension/interview.js'),
         background: resolve(__dirname, 'extension/background.firefox.js'),
       },

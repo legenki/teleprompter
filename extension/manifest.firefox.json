@@ -1,29 +1,43 @@
 {
   "manifest_version": 3,
-  "name": "Teleprompter",
+  "name": "Interview Copilot",
   "version": "1.1.0",
-  "description": "Teleprompter and interview copilot: live call transcription, Russian translation and short answer suggestions.",
-  "permissions": ["storage"],
+  "description": "Live call transcription, Russian translation and short answer suggestions for interviews.",
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://huggingface.co/*",
     "https://*.huggingface.co/*",
     "https://*.hf.co/*",
-    "https://api.groq.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "sidebar_action": {
-    "default_title": "Teleprompter",
-    "default_panel": "sidebar.html",
-    "default_icon": { "16": "icons/icon-16.png", "48": "icons/icon-48.png" }
+    "default_title": "Interview Copilot",
+    "default_panel": "interview.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png"
+    }
   },
   "action": {
-    "default_title": "Toggle Teleprompter",
-    "default_icon": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+    "default_title": "Toggle Interview Copilot",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
   },
-  "icons": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },
@@ -31,7 +45,11 @@
     "gecko": {
       "id": "teleprompter-interview@legenki.github.io",
       "strict_min_version": "142.0",
-      "data_collection_permissions": { "required": ["personalCommunications"] }
+      "data_collection_permissions": {
+        "required": [
+          "personalCommunications"
+        ]
+      }
     }
   }
 }

@@ -17,3 +17,6 @@ export function normalizeSize(stored) {
   const m = String(stored || '').match(/whisper-(tiny|base|small)/);
   return m ? m[1] : 'base';
 }
+
+// English-only checkpoints are accurate at `base`; Spanish needs the multilingual `small` to be reliable.
+export const defaultSize = (lang) => (lang === 'es' ? 'small' : 'base');

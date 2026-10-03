@@ -6,7 +6,7 @@ import { copyFileSync, mkdirSync, readdirSync, renameSync, rmSync } from 'fs';
 const ORT_FILES = ['ort-wasm-simd-threaded.asyncify.mjs', 'ort-wasm-simd-threaded.asyncify.wasm'];
 const OUT = 'dist/interview-web';
 
-// The page is the extension's interview.html with the shim in front of the script and no extension-only links.
+// The page is the extension's interview.html with the shim in front of the script.
 function webPage() {
   return {
     name: 'interview-web-page',
@@ -14,9 +14,7 @@ function webPage() {
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
-        const out = html
-          .replace('src="interview.js"', 'src="interview-web.js"')
-          .replace(/<a href="sidebar\.html"[^>]*>[^<]*<\/a>/, '<a href="../" class="link">Teleprompter</a>');
+        const out = html.replace('src="interview.js"', 'src="interview-web.js"');
         if (out === html) throw new Error('interview.html markup changed: web page transform no longer matches');
         return out;
       },

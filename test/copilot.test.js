@@ -141,7 +141,7 @@ test('isFatalGeminiError', () => {
   assert.equal(isFatalGeminiError(new Error('network')), false);
 });
 
-import { whisperModelId, whisperOptions, normalizeSize } from '../extension/lib/stt-models.js';
+import { whisperModelId, whisperOptions, normalizeSize, defaultSize } from '../extension/lib/stt-models.js';
 import { buildTranslateMessages } from '../extension/lib/prompt.js';
 
 test('Spanish isQuestion', () => {
@@ -190,4 +190,9 @@ test('prompts follow interviewer and answer languages', () => {
   assert.match(buildAnswerMessages({ question: 'Q', answerLang: 'ru' })[0].content, /answers in Russian/);
   assert.match(buildTranslateMessages('hola', 'es')[0].content, /Spanish text/);
   assert.match(buildTranscribeBody(new Float32Array(16), { language: 'es' }).contents[0].parts[1].text, /in Spanish/);
+});
+
+test('default Whisper size follows the interviewer language', () => {
+  assert.equal(whisperModelId(defaultSize('en'), 'en'), 'onnx-community/whisper-base.en');
+  assert.equal(whisperModelId(defaultSize('es'), 'es'), 'onnx-community/whisper-small');
 });
