@@ -60,6 +60,11 @@ test('isQuestion', () => {
   ]) assert.equal(isQuestion(t), false, t);
 });
 
+test('multi-word fillers are stripped before opener matching', () => {
+  assert.equal(isQuestion('And then tell me about your last role', 'en'), true);
+  assert.equal(isQuestion('A ver, cuéntame sobre tu experiencia', 'es'), true);
+});
+
 test('isNoise filters whisper hallucinations', () => {
   for (const t of ['', ' . ', 'Thank you.', 'you', '[MUSIC]', '(silence)']) assert.equal(isNoise(t), true, t);
   assert.equal(isNoise('Tell me about React hooks.'), false);
@@ -134,4 +139,55 @@ test('isFatalGeminiError', () => {
   assert.equal(isFatalGeminiError({ status: 429 }), true);
   assert.equal(isFatalGeminiError({ status: 500 }), false);
   assert.equal(isFatalGeminiError(new Error('network')), false);
+});
+
+import { whisperModelId, whisperOptions, normalizeSize } from '../extension/lib/stt-models.js';
+import { buildTranslateMessages } from '../extension/lib/prompt.js';
+
+test('Spanish isQuestion', () => {
+  for (const q of [
+    '¿Puedes hablarme de tu experiencia con React?',
+    'Cuéntame sobre un proyecto difícil',
+    'Bueno, entonces, ¿qué te motivó a cambiar de trabajo',
+    'Háblame de tus fortalezas.',
+    'Por qué quieres trabajar con nosotros',
+    'Gracias. Describe tu último proyecto.',
+  ]) assert.equal(isQuestion(q, 'es'), true, q);
+  for (const t of ['Hola, encantado de conocerte.', 'Somos un equipo de cincuenta ingenieros.', 'Vale, gracias.']) {
+    assert.equal(isQuestion(t, 'es'), false, t);
+  }
+  assert.equal(isQuestion('Y qué tal con Kubernetes', 'es'), true);
+  // unaccented conjunctions are not questions (real false positive seen on live speech)
+  for (const t of ['que quiero hacer una transferencia bancaria.', 'como te decía, trabajo en backend', 'cuando llegué había un problema']) {
+    assert.equal(isQuestion(t, 'es'), false, t);
+  }
+  // English openers must not fire in Spanish mode and vice versa
+  assert.equal(isQuestion('Tell me about yourself.', 'es'), false);
+  assert.equal(isQuestion('Cuéntame sobre ti.', 'en'), false);
+});
+
+test('isNoise knows Spanish hallucinations', () => {
+  for (const t of ['Gracias.', 'Subtítulos realizados por la comunidad de Amara.org', '¡Suscríbete!', 'Gracias por ver el video.']) {
+    assert.equal(isNoise(t), true, t);
+  }
+  assert.equal(isNoise('Gracias, ¿puedes contarme más sobre eso?'), false);
+});
+
+test('whisper model selection by language', () => {
+  assert.equal(whisperModelId('base', 'en'), 'onnx-community/whisper-base.en');
+  assert.equal(whisperModelId('base', 'es'), 'onnx-community/whisper-base');
+  assert.equal(whisperModelId('weird', 'en'), 'onnx-community/whisper-base.en');
+  assert.deepEqual(whisperOptions('es'), { language: 'spanish', task: 'transcribe' });
+  assert.deepEqual(whisperOptions('en'), {});
+  assert.equal(normalizeSize('onnx-community/whisper-tiny.en'), 'tiny');
+  assert.equal(normalizeSize(undefined), 'base');
+});
+
+test('prompts follow interviewer and answer languages', () => {
+  const m = buildAnswerMessages({ question: 'Q', interviewerLang: 'es', answerLang: 'en' });
+  assert.match(m[0].content, /interviewer, in Spanish/);
+  assert.match(m[0].content, /answers in English/);
+  assert.match(buildAnswerMessages({ question: 'Q', answerLang: 'ru' })[0].content, /answers in Russian/);
+  assert.match(buildTranslateMessages('hola', 'es')[0].content, /Spanish text/);
+  assert.match(buildTranscribeBody(new Float32Array(16), { language: 'es' }).contents[0].parts[1].text, /in Spanish/);
 });

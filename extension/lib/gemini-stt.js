@@ -23,9 +23,11 @@ export function toBase64(bytes) {
   return btoa(bin);
 }
 
-export function buildTranscribeBody(samples, { hint = '', previous = '' } = {}) {
+const SPOKEN = { en: 'English', es: 'Spanish' };
+
+export function buildTranscribeBody(samples, { hint = '', previous = '', language = 'en' } = {}) {
   const prompt = [
-    'Transcribe this audio from a job interview exactly as spoken, in English.',
+    `Transcribe this audio from a job interview exactly as spoken, in ${SPOKEN[language] || 'English'}.`,
     'Output ONLY the transcript text: no quotes, labels, timestamps or commentary.',
     'If there is no clear human speech, output nothing.',
     hint ? `Likely vocabulary (use these spellings when they are spoken): ${hint.slice(0, 600)}` : '',
@@ -44,12 +46,12 @@ export function buildTranscribeBody(samples, { hint = '', previous = '' } = {}) 
   };
 }
 
-export async function geminiTranscribe(samples, { key, model, hint }, previous, signal) {
+export async function geminiTranscribe(samples, { key, model, hint, language }, previous, signal) {
   const res = await fetch(geminiUrl(model, 'generateContent'), {
     method: 'POST',
     signal,
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify(buildTranscribeBody(samples, { hint, previous })),
+    body: JSON.stringify(buildTranscribeBody(samples, { hint, previous, language })),
   });
   if (!res.ok) {
     const err = new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 160)}`);

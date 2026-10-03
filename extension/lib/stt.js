@@ -1,66 +1,35 @@
 // Shared speech-to-text engine: audio stream -> utterances -> local Whisper -> text events.
 // Used by the Chrome offscreen document and, in Firefox, directly by the interview page.
-import { env, pipeline } from '@huggingface/transformers';
+import { createWhisper } from './whisper-client.js';
 import { Segmenter } from './segmenter.js';
 import { isNoise } from './question.js';
+import { whisperOptions } from './stt-models.js';
 import { geminiTranscribe, isFatalGeminiError } from './gemini-stt.js';
-
-env.allowLocalModels = false;
-env.useWasmCache = false; // wasm is bundled in the extension; the Cache API rejects extension URLs
-env.backends.onnx.wasm.wasmPaths = {
-  mjs: chrome.runtime.getURL('ort/ort-wasm-simd-threaded.asyncify.mjs'),
-  wasm: chrome.runtime.getURL('ort/ort-wasm-simd-threaded.asyncify.wasm'),
-};
-env.backends.onnx.wasm.numThreads = 1;
 
 // send({ type: 'status' | 'text' | 'level' | 'error', ... })
 export function createStt(send) {
-  let transcriber = null;
-  let loadedModel = null;
+  const whisper = createWhisper({
+    onProgress: (p) => send({ type: 'status', state: 'loading', detail: p.note || `Speech model ${p.percent}%` }),
+  });
   let playbackCtx = null;
   let analysisCtx = null;
   let stream = null;
   let segmenter = null;
   let queue = Promise.resolve();
   let pendingJobs = 0;
-  let cfg = { engine: 'whisper', model: '', gemini: null };
+  let cfg = { engine: 'whisper', model: '', language: 'en', gemini: null };
   let geminiOff = false;
   let previous = '';
 
   async function loadModel(model) {
-    if (transcriber && loadedModel === model) return;
-    transcriber = null;
+    if (whisper.isLoaded(model)) return;
     send({ type: 'status', state: 'loading', detail: `Loading speech model ${model}…` });
-
-    const progress_callback = (p) => {
-      if (p.status === 'progress' && p.total) {
-        send({ type: 'status', state: 'loading', detail: `Speech model ${Math.round(p.progress)}%` });
-      }
-    };
-
-    const hasWebGPU = !!navigator.gpu && !!(await navigator.gpu.requestAdapter().catch(() => null));
-    try {
-      if (!hasWebGPU) throw new Error('no webgpu');
-      transcriber = await pipeline('automatic-speech-recognition', model, {
-        device: 'webgpu',
-        dtype: { encoder_model: 'fp32', decoder_model_merged: 'q4' },
-        progress_callback,
-      });
-    } catch (e) {
-      send({ type: 'status', state: 'loading', detail: 'WebGPU unavailable, using CPU…' });
-      transcriber = await pipeline('automatic-speech-recognition', model, {
-        device: 'wasm',
-        dtype: 'q8',
-        progress_callback,
-      });
-    }
-    loadedModel = model;
+    await whisper.load(model);
   }
 
   async function whisperText(samples) {
     await loadModel(cfg.model);
-    const result = await transcriber(samples, { chunk_length_s: 30 });
-    return (result.text || '').trim();
+    return whisper.transcribe(samples, whisperOptions(cfg.language));
   }
 
   async function recognize(samples) {
@@ -111,10 +80,10 @@ export function createStt(send) {
 
   // getStream: () => Promise<MediaStream>. playback: replay the stream (needed for muted tab capture).
   // engine: 'whisper' | 'gemini'. With gemini, Whisper is only loaded if Gemini fails.
-  async function start({ getStream, model, playback = false, engine = 'whisper', gemini = null }) {
+  async function start({ getStream, model, language = 'en', playback = false, engine = 'whisper', gemini = null }) {
     await stop();
     if (engine === 'gemini' && !gemini?.key) throw new Error('Add a Gemini API key in settings to use Gemini speech recognition.');
-    cfg = { engine, model, gemini };
+    cfg = { engine, model, language, gemini: gemini && { ...gemini, language } };
     geminiOff = false;
     previous = '';
     if (engine === 'whisper') await loadModel(model);

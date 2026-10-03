@@ -18,6 +18,21 @@
         <button id="btn-settings" title="Settings">Settings</button>
         <div class="meter" title="Audio level"><div id="level"></div></div>
       </div>
+      <div class="row langs">
+        <label>Interviewer
+          <select id="interviewerLang">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </label>
+        <label>Answers
+          <select id="answerLang">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="ru">Русский</option>
+          </select>
+        </label>
+      </div>
     </header>
 
     <section id="settings" class="settings" hidden>
@@ -47,10 +62,11 @@
           <option value="gemini">Gemini (more accurate; audio is sent to Google)</option>
         </select>
       </label>
-      <label>Local speech model (also the fallback)
+      <label>Local speech model size (also the fallback)
         <select id="sttModel">
-          <option value="onnx-community/whisper-base.en">whisper-base.en (better)</option>
-          <option value="onnx-community/whisper-tiny.en">whisper-tiny.en (faster)</option>
+          <option value="tiny">tiny (fastest, least accurate)</option>
+          <option value="base">base (balanced)</option>
+          <option value="small">small (most accurate, slow on CPU)</option>
         </select>
       </label>
       <label>Answer length

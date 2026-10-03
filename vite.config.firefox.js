@@ -29,6 +29,7 @@ export default defineConfig({
   resolve: {
     alias: { '@mlc-ai/web-llm': resolve(__dirname, 'extension/stubs/web-llm.js') },
   },
+  worker: { format: 'es' },
   build: {
     target: 'esnext',
     outDir: 'dist/firefox',

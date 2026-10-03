@@ -9,6 +9,7 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'start') {
     stt.start({
       model: msg.model,
+      language: msg.language,
       engine: msg.engine,
       gemini: msg.gemini,
       playback: true, // capturing a tab mutes it, so play it back unchanged

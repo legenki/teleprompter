@@ -1,11 +1,12 @@
 import { createProvider, GEMINI_MODELS, GROQ_MODELS, LOCAL_MODELS } from './llm.js';
 import { isQuestion } from './lib/question.js';
+import { whisperModelId, normalizeSize } from './lib/stt-models.js';
 import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/prompt.js';
 
 const KEY = 'copilot.settings';
 const DEFAULTS = {
   provider: 'gemini', geminiKey: '', geminiModel: GEMINI_MODELS[0], groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
-  sttModel: 'onnx-community/whisper-base.en', sttEngine: 'whisper', audioDevice: '', style: 'short', resume: '', job: '',
+  sttModel: 'base', sttEngine: 'whisper', interviewerLang: 'en', answerLang: 'en', audioDevice: '', style: 'short', resume: '', job: '',
 };
 const FIELDS = Object.keys(DEFAULTS);
 const $ = (id) => document.getElementById(id);
@@ -28,6 +29,7 @@ let chain = Promise.resolve();
 async function loadSettings() {
   const stored = (await chrome.storage.local.get(KEY))[KEY] || {};
   settings = { ...DEFAULTS, ...stored };
+  settings.sttModel = normalizeSize(settings.sttModel);
   for (const [id, models] of [['geminiModel', GEMINI_MODELS], ['groqModel', GROQ_MODELS], ['localModel', LOCAL_MODELS]]) {
     for (const m of models) $(id).add(new Option(m, m));
   }
@@ -87,7 +89,8 @@ function sttConfig() {
   const engine = settings.sttEngine;
   if (engine === 'gemini' && !settings.geminiKey) throw new Error('Add a Gemini API key in settings to use Gemini speech recognition.');
   return {
-    model: settings.sttModel,
+    model: whisperModelId(settings.sttModel, settings.interviewerLang),
+    language: settings.interviewerLang,
     engine,
     gemini: { key: settings.geminiKey, model: settings.geminiModel, hint: settings.job.slice(0, 600) },
   };
@@ -148,7 +151,7 @@ function render(ui, parsed) {
 
 // ---------- pipeline ----------
 function handleLine(text, sttMs) {
-  const isQ = isQuestion(text);
+  const isQ = isQuestion(text, settings.interviewerLang);
   const ui = addCard(text, isQ);
   const ctx = history.slice(-3);
   history.push(text);
@@ -162,8 +165,8 @@ function run(text, ui, answer, ctx) {
   const ac = new AbortController();
   if (answer) currentAbort = ac;
   const messages = answer
-    ? buildAnswerMessages({ resume: settings.resume, job: settings.job, style: settings.style, history: ctx, question: text })
-    : buildTranslateMessages(text);
+    ? buildAnswerMessages({ resume: settings.resume, job: settings.job, style: settings.style, history: ctx, question: text, interviewerLang: settings.interviewerLang, answerLang: settings.answerLang })
+    : buildTranslateMessages(text, settings.interviewerLang);
 
   chain = chain.then(async () => {
     if (ac.signal.aborted) return;
@@ -240,6 +243,12 @@ $('btn-start').onclick = async () => {
 $('btn-devices').onclick = () => populateDevices(true);
 $('btn-settings').onclick = () => { $('settings').hidden = !$('settings').hidden; };
 for (const f of FIELDS) $(f).addEventListener('change', saveSettings);
+// The speech model and language are fixed at start: stop so the next Start picks up the new language.
+$('interviewerLang').addEventListener('change', () => {
+  if (!$('btn-start').classList.contains('on')) return;
+  $('btn-start').click();
+  setTimeout(() => setStatus('idle', 'Language changed: press Start'), 300);
+});
 
 $('manual').onsubmit = (e) => {
   e.preventDefault();

@@ -5,16 +5,20 @@ const STYLE = {
   medium: 'Each answer must be 1-2 sentences (max 45 words).',
 };
 
-export function buildAnswerMessages({ resume, job, style = 'short', history, question }) {
+export const LANG_NAMES = { en: 'English', es: 'Spanish', ru: 'Russian' };
+
+export function buildAnswerMessages({ resume, job, style = 'short', history, question, interviewerLang = 'en', answerLang = 'en' }) {
+  const from = LANG_NAMES[interviewerLang] || 'English';
+  const to = LANG_NAMES[answerLang] || 'English';
   const system = [
-    'You are a real-time interview copilot for a candidate. You hear the interviewer, in English.',
-    'The candidate answers in English; the candidate reads Russian.',
+    `You are a real-time interview copilot for a candidate. You hear the interviewer, in ${from}.`,
+    `The candidate answers in ${to}; the candidate reads Russian.`,
     resume ? `CANDIDATE RESUME:\n${resume.slice(0, 4000)}` : '',
     job ? `JOB DESCRIPTION:\n${job.slice(0, 3000)}` : '',
     'Reply in EXACTLY this line format, nothing else:',
-    'RU: <natural Russian translation of the interviewer\'s latest question>',
-    'KEY: <3-5 short English keywords/phrases to hit, separated by " | ">',
-    'A1: <answer option 1, English, first person, grounded in the resume>',
+    `RU: <natural Russian translation of the interviewer's latest question>`,
+    `KEY: <3-5 short ${to} keywords/phrases to hit, separated by " | ">`,
+    `A1: <answer option 1, ${to}, first person, grounded in the resume>`,
     'A2: <answer option 2, different angle>',
     'A3: <answer option 3, different angle>',
     STYLE[style] || STYLE.short,
@@ -29,9 +33,10 @@ export function buildAnswerMessages({ resume, job, style = 'short', history, que
   return [{ role: 'system', content: system }, { role: 'user', content: user }];
 }
 
-export function buildTranslateMessages(text) {
+export function buildTranslateMessages(text, interviewerLang = 'en') {
+  const from = LANG_NAMES[interviewerLang] || 'English';
   return [
-    { role: 'system', content: 'Translate the English text to natural spoken Russian. Reply with the translation only, prefixed by "RU: ".' },
+    { role: 'system', content: `Translate the ${from} text to natural spoken Russian. Reply with the translation only, prefixed by "RU: ".` },
     { role: 'user', content: text },
   ];
 }

@@ -143,7 +143,11 @@ npm test                       # unit tests for segmentation / question detectio
    is then sent to Google, and on the free tier Google may use it to improve its models — do not enable it if that is a problem.
    Gemini mode waits for longer pauses (fewer requests); if the quota or key fails (401/403/429) the extension falls back to
    local Whisper automatically. Whisper stays the default.
-4. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
+4. **Languages.** Two selectors in the panel header: *Interviewer* (English / Español) and *Answers* (English / Español /
+   Русский). The Russian translation line is always shown. Changing the interviewer language while listening stops it; press
+   Start again. For Spanish the multilingual Whisper models are used (`base` makes noticeable mistakes, `small` is accurate but
+   several times slower on CPU; Gemini recognition handles Spanish best). Whisper runs in a Web Worker, so the UI stays responsive.
+5. Click an answer to copy it. **Answer last** re-runs suggestions for the last line; the input field lets you test without audio.
 
 Notes: only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in
 `chrome.storage.local`. Speech and LLM models are downloaded from huggingface.co on first use.
