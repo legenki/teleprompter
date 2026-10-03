@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: 22 # .nvmrc still says 12, which Vite cannot run on
           cache: npm
 
       # onnxruntime-node's postinstall downloads native binaries that the browser build does not need
