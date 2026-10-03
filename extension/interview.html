@@ -19,6 +19,9 @@
           </div>
         </div>
         <div class="bar-actions">
+          <button id="btn-compose" class="icon-btn" type="button" aria-label="Type a question" aria-controls="composer" aria-expanded="false" title="Type a question">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/></svg>
+          </button>
           <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings" aria-controls="drawer" aria-expanded="false">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
           </button>
@@ -54,6 +57,15 @@
           <ol id="empty-steps"></ol>
         </div>
       </main>
+
+      <form id="composer" class="composer" autocomplete="off" inert>
+        <div class="composer-in">
+          <input id="composer-input" type="text" placeholder="Type the interviewer's question…" aria-label="Question" spellcheck="false">
+          <button class="send" type="submit" aria-label="Get answers">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
     </div>
 
     <div id="scrim" class="scrim" hidden></div>

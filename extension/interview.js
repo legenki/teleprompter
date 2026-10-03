@@ -151,6 +151,24 @@ $('btn-close').onclick = () => setDrawer(false);
 $('scrim').onclick = () => setDrawer(false);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('drawer').classList.contains('open')) setDrawer(false); });
 
+// ---------- manual question ----------
+function setComposer(open) {
+  const f = $('composer');
+  f.classList.toggle('open', open);
+  f.inert = !open;
+  $('btn-compose').setAttribute('aria-expanded', String(open));
+  if (open) $('composer-input').focus({ preventScroll: true });
+}
+$('btn-compose').onclick = () => setComposer(!$('composer').classList.contains('open'));
+$('composer').onsubmit = (e) => {
+  e.preventDefault();
+  const v = $('composer-input').value.trim();
+  if (!v) return;
+  $('composer-input').value = '';
+  handleLine(v, undefined, true); // typed on purpose, so always answer it
+};
+$('composer-input').addEventListener('keydown', (e) => { if (e.key === 'Escape') { setComposer(false); $('btn-compose').focus(); } });
+
 // ---------- audio sources ----------
 async function populateDevices(askPermission) {
   if (askPermission) {
@@ -288,8 +306,8 @@ function render(ui, parsed) {
 }
 
 // ---------- pipeline ----------
-function handleLine(text, sttMs) {
-  const isQ = isQuestion(text, settings.interviewerLang);
+function handleLine(text, sttMs, forceQuestion = false) {
+  const isQ = forceQuestion || isQuestion(text, settings.interviewerLang);
   const ui = addCard(text, isQ);
   const ctx = history.slice(-3);
   history.push(text);

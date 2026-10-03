@@ -133,7 +133,7 @@ npm run build:ext              # then load dist/extension via chrome://extension
 npm test                       # unit tests for segmentation / question detection / prompts / phone relay
 ```
 
-1. Open the call tab, click the extension icon on it (this grants tab-capture access) and press **Start**.
+1. Open the call tab, click the extension icon on it (this grants tab-capture access) and press **Start**. The keyboard icon in the header opens a field for typing a question by hand (handy for testing the answers without audio).
 2. **Settings** (top right): paste a free Gemini API key (aistudio.google.com/apikey), your resume and the vacancy.
 3. **Languages** are two switches under the header: *Interviewer* (EN / ES) and *Answers* (EN / ES / RU). The Russian
    translation line is always shown. Changing the interviewer language while listening stops it; press Start again.
