@@ -36,10 +36,11 @@
     "dev:ext": "vite build --config vite.config.ext.js --watch",
     "build:web": "vite build --config vite.config.web.js",
     "build:ext": "vite build --config vite.config.ext.js",
-    "build": "npm run build:web && npm run build:ext && npm run build:firefox",
+    "build": "npm run build:web && npm run build:ext && npm run build:firefox && npm run build:interview",
     "test": "node --test test/copilot.test.js test/relay.test.js",
     "build:firefox": "vite build --config vite.config.firefox.js",
-    "phone": "node copilot-server.js"
+    "phone": "node copilot-server.js",
+    "build:interview": "vite build --config vite.config.interview.js"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",

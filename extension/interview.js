@@ -14,6 +14,8 @@ const $ = (id) => document.getElementById(id);
 
 // Firefox has no tabCapture/offscreen: capture an audio input (virtual cable) and run Whisper in this page.
 const IN_PAGE = !chrome.tabCapture || new URLSearchParams(location.search).has('inpage');
+const TAB = '__tab__';
+const CAN_SHARE_TAB = !!navigator.mediaDevices?.getDisplayMedia && /Chrome|Edg\//.test(navigator.userAgent) && !/Mobile|Android/.test(navigator.userAgent);
 const CABLE = /blackhole|vb-?cable|cable output|loopback|monitor of|soundflower|voicemeeter/i;
 
 let settings = { ...DEFAULTS };
@@ -69,8 +71,23 @@ async function populateDevices(askPermission) {
   const devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput');
   const sel = $('audioDevice');
   sel.replaceChildren(new Option('Auto: BlackHole / VB-Cable / Loopback', ''));
+  if (CAN_SHARE_TAB) sel.add(new Option('Browser tab audio (share a tab, tick "Share tab audio")', TAB));
   for (const d of devices) sel.add(new Option(d.label || `Input ${sel.length}`, d.deviceId));
-  sel.value = devices.some((d) => d.deviceId === settings.audioDevice) ? settings.audioDevice : '';
+  sel.value = settings.audioDevice === TAB && CAN_SHARE_TAB || devices.some((d) => d.deviceId === settings.audioDevice) ? settings.audioDevice : '';
+}
+
+// getDisplayMedia needs a user gesture, so this must be called straight from the click handler.
+async function openTabAudio() {
+  const stream = await navigator.mediaDevices.getDisplayMedia({
+    video: true, // Chrome requires a video track; it is discarded below
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+  });
+  stream.getVideoTracks().forEach((t) => { t.stop(); stream.removeTrack(t); });
+  if (!stream.getAudioTracks().length) {
+    stream.getTracks().forEach((t) => t.stop());
+    throw new Error('No audio was shared. Choose a browser tab and tick "Also share tab audio".');
+  }
+  return stream;
 }
 
 async function openAudioInput() {
@@ -245,10 +262,15 @@ $('btn-start').onclick = async () => {
     if (running) { await stt?.stop(); onSttEvent({ type: 'status', state: 'idle', detail: 'Stopped' }); return; }
     setStatus('loading', 'Starting…');
     getProvider().ready().catch((e) => setStatus('error', e.message));
+    let tabStream = null;
     try {
+      // Await the picker first: a cancelled share fails immediately instead of after the model download.
+      if (settings.audioDevice === TAB) tabStream = await openTabAudio();
+      const cfg = sttConfig();
       stt ??= (await import('./lib/stt.js')).createStt(onSttEvent);
-      await stt.start({ ...sttConfig(), getStream: openAudioInput });
+      await stt.start({ ...cfg, getStream: tabStream ? async () => tabStream : openAudioInput });
     } catch (e) {
+      tabStream?.getTracks().forEach((t) => t.stop());
       onSttEvent({ type: 'error', error: e.message });
       onSttEvent({ type: 'status', state: 'idle', detail: 'Stopped' });
     }

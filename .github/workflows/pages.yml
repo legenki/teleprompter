@@ -1,0 +1,55 @@
+name: Deploy site to GitHub Pages
+
+# Publishes the existing static site (repo root) plus the Interview Copilot web page at /interview/.
+# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # onnxruntime-node's postinstall downloads native binaries that the browser build does not need
+      - run: npm ci --ignore-scripts
+
+      - run: npm test
+
+      - run: npm run build:interview
+
+      - name: Assemble site
+        run: |
+          mkdir _site
+          cp -r index.html remote.html manifest.json sw.js favicon.ico robots.txt sitemap.xml humans.txt assets _site/
+          cp -r dist/interview-web _site/interview
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -189,3 +189,20 @@ npm run phone     # on the computer running the extension; prints a pairing toke
 Security: the relay listens on all interfaces (`COPILOT_HOST=127.0.0.1` restricts it to this computer) and the token is the
 only protection; traffic is not encrypted. Use a network you trust, not a public Wi-Fi. macOS may ask to allow incoming
 connections for Node the first time.
+
+### Interview Copilot as a web page (GitHub Pages)
+
+The same page runs without the extension: `https://<user>.github.io/teleprompter/interview/`.
+
+```bash
+npm run build:interview     # -> dist/interview-web (static; any HTTPS host or localhost works)
+```
+
+- **Deploy:** repo *Settings → Pages → Source: GitHub Actions*, then merge to `master` (or run the *Deploy site to GitHub Pages*
+  workflow). The workflow also republishes the existing site from the repo root, so nothing there changes.
+- **Audio:** in Chrome / Edge on desktop choose **Browser tab audio**: pressing Start opens the share picker; pick the call tab
+  and tick *Also share tab audio*. Other browsers use a virtual cable / microphone as in the Firefox version.
+- Settings, the API key and the resume are kept in this browser's `localStorage`. **Every project site under the same
+  `<user>.github.io` shares one origin and can read them** — only host this next to pages you fully trust, or use a custom domain.
+- The phone relay (`npm run phone`) is plain `ws://`, which an HTTPS page cannot connect to from another device; keep using
+  the relay's own `http://<ip>:3100` page for the phone.
