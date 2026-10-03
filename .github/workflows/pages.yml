@@ -1,10 +1,11 @@
 name: Deploy site to GitHub Pages
 
-# Publishes the existing static site (repo root) plus the Interview Copilot web page at /interview/.
-# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+# Site layout:  /          Interview Copilot (built from extension/)
+#               /classic/  the original teleprompter (static files from the repo root)
+# One-time setup: repo Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
 on:
   push:
-    branches: [master]
+    branches: [develop, master, main]
   workflow_dispatch:
 
 permissions:
@@ -36,9 +37,13 @@ jobs:
 
       - name: Assemble site
         run: |
-          mkdir _site
-          cp -r index.html remote.html manifest.json sw.js favicon.ico robots.txt sitemap.xml humans.txt assets _site/
-          cp -r dist/interview-web _site/interview
+          mkdir -p _site/classic
+          cp -r dist/interview-web/. _site/
+          cp -r index.html remote.html manifest.json sw.js favicon.ico assets _site/classic/
+          cp robots.txt humans.txt sitemap.xml favicon.ico _site/
+          # a replacement for the old root service worker, so returning visitors do not keep seeing the classic app
+          cp .github/pages/sw.js _site/sw.js
+          sed -i 's#https://legenki.github.io/teleprompter/"#https://legenki.github.io/teleprompter/classic/"#' _site/classic/index.html
 
       - uses: actions/upload-pages-artifact@v3
         with:

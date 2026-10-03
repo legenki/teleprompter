@@ -13,3 +13,6 @@ dist/
 
 # phone relay pairing token
 .copilot-token
+
+# Pages artifact
+_site/

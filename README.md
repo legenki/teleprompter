@@ -184,14 +184,17 @@ connections for Node the first time.
 
 ### Interview Copilot as a web page (GitHub Pages)
 
-The same page runs without the extension: `https://<user>.github.io/teleprompter/interview/`.
+The same page runs without the extension: `https://<user>.github.io/teleprompter/` (the original teleprompter is kept at
+`/classic/`).
 
 ```bash
 npm run build:interview     # -> dist/interview-web (static; any HTTPS host or localhost works)
 ```
 
-- **Deploy:** repo *Settings → Pages → Source: GitHub Actions*, then merge to `master` (or run the *Deploy site to GitHub Pages*
-  workflow). The workflow also republishes the existing site from the repo root, so nothing there changes.
+- **Deploy:** repo *Settings → Pages → Build and deployment → Source: **GitHub Actions*** (the default "Deploy from a branch"
+  keeps serving the repo root, i.e. the classic teleprompter). The *Deploy site to GitHub Pages* workflow then runs on every
+  push to `develop` / `master` / `main`, or manually from the Actions tab. A small service worker at the site root clears the
+  old teleprompter cache for returning visitors.
 - **Audio:** in Chrome / Edge on desktop choose *Settings → Audio source → Browser tab audio*: pressing Start opens the share
   picker; pick the call tab and tick *Also share tab audio*. Other browsers use a virtual cable as in the Firefox version.
 - Settings, the API key and the resume are kept in this browser's `localStorage`. **Every project site under the same
