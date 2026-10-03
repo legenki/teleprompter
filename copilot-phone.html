@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Copilot</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#14171c">
+  <style>
+    :root { --bg:#14171c; --panel:#1c2027; --line:#2b313b; --text:#e6e9ee; --dim:#8b94a3; --accent:#4f9cff; --ok:#3ecf8e; --ru:#ffd479; --size:20px; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text);
+      font: 16px/1.4 -apple-system, system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+    header { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 8px) 14px 8px;
+      background: rgba(28,32,39,.96); border-bottom: 1px solid var(--line); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #c0392b; flex: none; }
+    .dot.on { background: var(--ok); }
+    #state { color: var(--dim); font-size: 13px; flex: 1; }
+    button { background: #272d37; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font: inherit; }
+    main { padding: 12px 14px calc(env(safe-area-inset-bottom) + 20px); }
+    .empty { color: var(--dim); text-align: center; margin-top: 30vh; padding: 0 20px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+    .card.q { border-left: 4px solid var(--accent); }
+    .card.latest { border-color: var(--accent); }
+    .en { color: var(--dim); font-size: calc(var(--size) * .65); }
+    .ru { color: var(--ru); font-size: var(--size); font-weight: 600; margin: 6px 0 8px; }
+    .keys { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .chip { background: #243246; color: #bcd7ff; border-radius: 12px; padding: 2px 10px; font-size: calc(var(--size) * .7); }
+    .answer { background: #20262f; border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin: 6px 0; font-size: calc(var(--size) * .9); }
+    .meta { color: var(--dim); font-size: 12px; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="dot" id="dot"></span>
+    <span id="state">Connecting…</span>
+    <button id="smaller" aria-label="Smaller text">A−</button>
+    <button id="bigger" aria-label="Bigger text">A+</button>
+  </header>
+  <main id="feed">
+    <p class="empty" id="empty">Waiting for the interview…<br>Phone screen: set Auto-Lock to Never while using it (Settings → Display &amp; Brightness).</p>
+  </main>
+
+  <script>
+    var params = new URLSearchParams(location.search);
+    var token = params.get('t') || sessionStorage.getItem('copilot-token') || '';
+    try { if (params.get('t')) sessionStorage.setItem('copilot-token', token); } catch (e) {}
+    if (params.get('t')) history.replaceState(null, '', location.pathname); // keep the token out of the address bar
+
+    var feed = document.getElementById('feed');
+    var cards = new Map(); // id -> element
+    var order = [];        // ids, oldest first
+
+    function el(tag, cls, text) {
+      var e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    }
+
+    function upsert(c) {
+      var empty = document.getElementById('empty');
+      if (empty) empty.remove();
+      var node = cards.get(c.id);
+      if (!node) {
+        node = el('div', 'card');
+        cards.set(c.id, node);
+        order.push(c.id);
+        feed.prepend(node); // newest on top: easiest to glance at
+      }
+      node.className = 'card' + (c.isQ ? ' q' : '');
+      var kids = [el('div', 'en', c.en), el('div', 'ru', c.ru || '…')];
+      if (c.keys && c.keys.length) {
+        var k = el('div', 'keys');
+        c.keys.forEach(function (x) { k.append(el('span', 'chip', x)); });
+        kids.push(k);
+      }
+      (c.answers || []).forEach(function (a) { kids.push(el('div', 'answer', a)); });
+      if (c.meta) kids.push(el('div', 'meta', c.meta));
+      node.replaceChildren.apply(node, kids);
+      mark();
+    }
+
+    function mark() {
+      cards.forEach(function (n) { n.classList.remove('latest'); });
+      var last = cards.get(order[order.length - 1]);
+      if (last) last.classList.add('latest');
+    }
+
+    function clearAll() {
+      cards.forEach(function (n) { n.remove(); });
+      cards.clear();
+      order = [];
+    }
+
+    var dot = document.getElementById('dot');
+    var state = document.getElementById('state');
+    var retry = 1000;
+
+    function connect() {
+      var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      var ws = new WebSocket(proto + '//' + location.host + '/ws?role=sub&t=' + encodeURIComponent(token));
+      ws.onopen = function () { dot.classList.add('on'); state.textContent = 'Live'; retry = 1000; };
+      ws.onmessage = function (e) {
+        var m;
+        try { m = JSON.parse(e.data); } catch (err) { return; }
+        if (m.type === 'snapshot') { clearAll(); m.cards.forEach(upsert); }
+        else if (m.type === 'card') upsert(m.card);
+        else if (m.type === 'clear') clearAll();
+      };
+      ws.onclose = function (e) {
+        dot.classList.remove('on');
+        if (e.code === 1008) { state.textContent = 'Wrong or missing token. Open the link printed by "npm run phone".'; return; }
+        state.textContent = 'Reconnecting…';
+        setTimeout(connect, retry);
+        retry = Math.min(retry * 2, 8000);
+      };
+    }
+    connect();
+
+    var size = Number(localStorage.getItem('copilot-size')) || 20;
+    function applySize() { document.documentElement.style.setProperty('--size', size + 'px'); try { localStorage.setItem('copilot-size', size); } catch (e) {} }
+    document.getElementById('smaller').onclick = function () { size = Math.max(14, size - 2); applySize(); };
+    document.getElementById('bigger').onclick = function () { size = Math.min(40, size + 2); applySize(); };
+    applySize();
+  </script>
+</body>
+</html>

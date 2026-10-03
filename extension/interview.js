@@ -1,12 +1,13 @@
 import { createProvider, GEMINI_MODELS, GROQ_MODELS, LOCAL_MODELS } from './llm.js';
 import { isQuestion } from './lib/question.js';
 import { whisperModelId, normalizeSize } from './lib/stt-models.js';
+import { createPhoneLink } from './lib/phone-link.js';
 import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/prompt.js';
 
 const KEY = 'copilot.settings';
 const DEFAULTS = {
   provider: 'gemini', geminiKey: '', geminiModel: GEMINI_MODELS[0], groqKey: '', groqModel: GROQ_MODELS[0], localModel: LOCAL_MODELS[0],
-  sttModel: 'base', sttEngine: 'whisper', interviewerLang: 'en', answerLang: 'en', audioDevice: '', style: 'short', resume: '', job: '',
+  sttModel: 'base', sttEngine: 'whisper', interviewerLang: 'en', answerLang: 'en', audioDevice: '', phoneEnabled: 'off', phoneRelay: 'localhost:3100', phoneToken: '', style: 'short', resume: '', job: '',
 };
 const FIELDS = Object.keys(DEFAULTS);
 const $ = (id) => document.getElementById(id);
@@ -16,6 +17,19 @@ const IN_PAGE = !chrome.tabCapture || new URLSearchParams(location.search).has('
 const CABLE = /blackhole|vb-?cable|cable output|loopback|monitor of|soundflower|voicemeeter/i;
 
 let settings = { ...DEFAULTS };
+let cardSeq = 0;
+const phone = createPhoneLink({
+  getSettings: () => settings,
+  onState: (state, detail) => {
+    $('phone-status').textContent = {
+      off: 'Phone display is off.',
+      connecting: detail || 'Connecting to the relay…',
+      connected: 'Connected to the relay. Open the link from npm run phone on your phone.',
+      error: detail || 'Relay error.',
+    }[state];
+  },
+});
+function publish(ui, immediate) { phone.publish({ ...ui.data }, immediate); }
 let stt = null;
 let provider = null;
 let providerSig = '';
@@ -43,6 +57,7 @@ async function loadSettings() {
     await populateDevices(false);
   }
   syncProviderFields();
+  phone.sync();
 }
 
 async function populateDevices(askPermission) {
@@ -76,6 +91,7 @@ function saveSettings() {
   for (const f of FIELDS) settings[f] = $(f).value;
   chrome.storage.local.set({ [KEY]: settings });
   syncProviderFields();
+  phone.sync();
 }
 
 function syncProviderFields() {
@@ -132,11 +148,15 @@ function addCard(text, isQ) {
   const nearBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80;
   feed.append(card);
   if (nearBottom) feed.scrollTop = feed.scrollHeight;
-  return { card, ru, keys, answers, meta };
+  const ui = { card, ru, keys, answers, meta, data: { id: ++cardSeq, en: text, ru: '', isQ, keys: [], answers: [], meta: '' } };
+  publish(ui, true);
+  return ui;
 }
 
 function render(ui, parsed) {
   if (parsed.ru) ui.ru.textContent = parsed.ru;
+  Object.assign(ui.data, { ru: ui.ru.textContent === '…' ? '' : ui.ru.textContent, keys: parsed.key, answers: parsed.answers });
+  publish(ui);
   ui.keys.replaceChildren(...parsed.key.map((k) => el('span', 'chip', k)));
   ui.answers.replaceChildren(...parsed.answers.map((a) => {
     const b = el('button', 'answer', a);
@@ -179,11 +199,21 @@ function run(text, ui, answer, ctx) {
         onToken: (full) => render(ui, answer ? parseReply(full) : { ru: full.replace(/^\s*RU:\s*/i, ''), key: [], answers: [] }),
       });
       ui.meta.textContent = `${ui.sttMs != null ? `STT ${(ui.sttMs / 1000).toFixed(1)}s · ` : ''}LLM ${((performance.now() - t0) / 1000).toFixed(1)}s`;
+      ui.data.meta = ui.meta.textContent;
+      publish(ui, true);
       if (listening) setStatus('listening', 'Listening…');
     } catch (e) {
-      if (ac.signal.aborted) { ui.ru.textContent = ui.ru.textContent === '…' ? '(superseded by a newer question)' : ui.ru.textContent; return; }
+      if (ac.signal.aborted) {
+        ui.ru.textContent = ui.ru.textContent === '…' ? '(superseded by a newer question)' : ui.ru.textContent;
+        ui.data.ru = ui.ru.textContent;
+        publish(ui, true);
+        return;
+      }
       ui.ru.textContent = '';
       ui.meta.replaceChildren(el('span', 'err', e.message));
+      ui.data.ru = '';
+      ui.data.meta = e.message;
+      publish(ui, true);
     }
   });
 }

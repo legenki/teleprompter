@@ -170,3 +170,22 @@ Firefox cannot capture tab audio, so the call audio goes through a **virtual aud
 
 In Firefox speech recognition runs in the sidebar page itself (CPU unless WebGPU is available), and only the
 Gemini and Groq answer engines are offered — the local WebLLM model is not bundled. Closing the sidebar stops listening.
+
+### Phone as a second screen (iPhone / any phone browser)
+
+iOS apps cannot hear another app's audio, so the phone is a *display*: the computer does the listening and the
+phone shows the Russian translation, key points and answer options.
+
+```bash
+npm run phone     # on the computer running the extension; prints a pairing token and phone links
+```
+
+1. Extension → Settings → **Phone display**: switch *On*, relay `localhost:3100`, paste the token.
+2. On the phone (same Wi-Fi) open the `http://<computer-ip>:3100/?t=<token>` link printed by the command.
+   Newest card is on top; `A−/A+` change the text size. The page reconnects by itself and replays recent cards.
+3. Set the phone's Auto-Lock to *Never* while interviewing (Settings → Display & Brightness). Browsers only
+   allow the screen Wake Lock over HTTPS, and this relay is plain HTTP on your local network.
+
+Security: the relay listens on all interfaces (`COPILOT_HOST=127.0.0.1` restricts it to this computer) and the token is the
+only protection; traffic is not encrypted. Use a network you trust, not a public Wi-Fi. macOS may ask to allow incoming
+connections for Node the first time.

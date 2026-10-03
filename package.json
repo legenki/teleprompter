@@ -37,15 +37,17 @@
     "build:web": "vite build --config vite.config.web.js",
     "build:ext": "vite build --config vite.config.ext.js",
     "build": "npm run build:web && npm run build:ext && npm run build:firefox",
-    "test": "node --test test/copilot.test.js",
-    "build:firefox": "vite build --config vite.config.firefox.js"
+    "test": "node --test test/copilot.test.js test/relay.test.js",
+    "build:firefox": "vite build --config vite.config.firefox.js",
+    "phone": "node copilot-server.js"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",
     "@mlc-ai/web-llm": "^0.2.85",
     "express": "^4.18.2",
     "jquery": "^4.0.0",
-    "socket.io": "^4.5.4"
+    "socket.io": "^4.5.4",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

@@ -69,6 +69,19 @@
           <option value="small">small (most accurate, slow on CPU)</option>
         </select>
       </label>
+      <fieldset class="phone">
+        <legend>Phone display (second screen)</legend>
+        <label>Show cards on phone
+          <select id="phoneEnabled"><option value="off">Off</option><option value="on">On</option></select>
+        </label>
+        <label>Relay address
+          <input id="phoneRelay" type="text" placeholder="localhost:3100" autocomplete="off">
+        </label>
+        <label>Pairing token
+          <input id="phoneToken" type="password" placeholder="printed by npm run phone" autocomplete="off">
+        </label>
+        <p class="hint" id="phone-status">Run <code>npm run phone</code> on this computer, then open the printed link on your phone.</p>
+      </fieldset>
       <label>Answer length
         <select id="style">
           <option value="short">1 sentence</option>

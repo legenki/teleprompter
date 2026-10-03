@@ -10,3 +10,6 @@ Thumbs.db
 node_modules
 !.nvmrc
 dist/
+
+# phone relay pairing token
+.copilot-token
