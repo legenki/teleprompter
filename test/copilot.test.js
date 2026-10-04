@@ -92,7 +92,8 @@ test('buildAnswerMessages embeds resume and history', () => {
   assert.match(m[1].content, /Q\?/);
 });
 
-import { toGeminiBody } from '../extension/llm.js';
+import { toGeminiBody, GEMINI_MODELS } from '../extension/llm.js';
+import { geminiUrl, GEMINI_STT_MODEL, isGemini3 } from '../extension/lib/gemini.js';
 
 test('toGeminiBody maps system/user/assistant and disables thinking', () => {
   const b = toGeminiBody([
@@ -195,4 +196,23 @@ test('prompts follow interviewer and answer languages', () => {
 test('default Whisper size follows the interviewer language', () => {
   assert.equal(whisperModelId(defaultSize('en'), 'en'), 'onnx-community/whisper-base.en');
   assert.equal(whisperModelId(defaultSize('es'), 'es'), 'onnx-community/whisper-small');
+});
+
+test('Gemini 3.x requests omit thinkingBudget and temperature; 2.x keep them', () => {
+  const msgs = [{ role: 'system', content: 'S' }, { role: 'user', content: 'U' }];
+  const g3 = toGeminiBody(msgs, 'gemini-3.5-flash-lite').generationConfig;
+  assert.deepEqual(Object.keys(g3), ['maxOutputTokens']);
+  const g25 = toGeminiBody(msgs, 'gemini-2.5-flash-lite').generationConfig;
+  assert.equal(g25.thinkingConfig.thinkingBudget, 0);
+  assert.equal(g25.temperature, 0.5);
+  assert.equal(isGemini3('gemini-3.5-flash-lite'), true);
+  assert.equal(isGemini3('gemini-2.5-flash'), false);
+});
+
+test('answers default to 3.5 Flash-Lite while speech recognition uses a documented audio model', () => {
+  assert.equal(GEMINI_MODELS[0], 'gemini-3.5-flash-lite');
+  assert.equal(GEMINI_STT_MODEL, 'gemini-2.5-flash-lite');
+  assert.equal(geminiUrl('gemini-3.5-flash-lite', 'streamGenerateContent'),
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:streamGenerateContent');
+  assert.equal(isFatalGeminiError({ status: 404 }), true);
 });

@@ -1,4 +1,5 @@
 import { createProvider, GEMINI_MODELS } from './llm.js';
+import { GEMINI_STT_MODEL } from './lib/gemini.js';
 import { isQuestion } from './lib/question.js';
 import { whisperModelId, defaultSize } from './lib/stt-models.js';
 import { createPhoneLink } from './lib/phone-link.js';
@@ -105,7 +106,8 @@ async function loadSettings() {
   const stored = (await chrome.storage.local.get(KEY))[KEY] || {};
   settings = { ...DEFAULTS, ...Object.fromEntries(FIELDS.filter((f) => f in stored).map((f) => [f, stored[f]])) };
   for (const m of GEMINI_MODELS) $('geminiModel').add(new Option(m, m));
-  if (!GEMINI_MODELS.includes(settings.geminiModel)) settings.geminiModel = GEMINI_MODELS[0];
+  // 2.5 Flash was the old default and has tighter free limits than 3.5 Flash-Lite, so move people off it once.
+  if (!GEMINI_MODELS.includes(settings.geminiModel) || settings.geminiModel === 'gemini-2.5-flash') settings.geminiModel = GEMINI_MODELS[0];
 
   if (IN_PAGE) {
     document.querySelectorAll('[data-inpage]').forEach((e) => { e.hidden = false; });
@@ -223,7 +225,7 @@ function sttConfig() {
     model: whisperModelId(defaultSize(lang), lang),
     language: lang,
     engine,
-    gemini: { key: settings.geminiKey, model: settings.geminiModel, hint: settings.job.slice(0, 600) },
+    gemini: { key: settings.geminiKey, model: GEMINI_STT_MODEL, hint: settings.job.slice(0, 600) },
   };
 }
 

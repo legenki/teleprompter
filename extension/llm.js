@@ -1,11 +1,11 @@
-import { geminiUrl } from './lib/gemini.js';
+import { geminiUrl, isGemini3 } from './lib/gemini.js';
 
 // Streaming chat provider. stream(messages, { onToken, signal }) -> full text.
-export const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+export const GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
 
-// OpenAI-style messages -> Gemini generateContent body. Thinking is disabled: it adds seconds of latency
-// and eats the output budget, which is wrong for a live copilot.
-export function toGeminiBody(messages) {
+// OpenAI-style messages -> Gemini generateContent body. On 2.x thinking is disabled (it adds seconds of latency
+// and eats the output budget, which is wrong for a live copilot); 3.x already thinks minimally by default.
+export function toGeminiBody(messages, model = '') {
   const system = messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n');
   return {
     ...(system && { systemInstruction: { parts: [{ text: system }] } }),
@@ -13,7 +13,9 @@ export function toGeminiBody(messages) {
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
     })),
-    generationConfig: { temperature: 0.5, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
+    generationConfig: isGemini3(model)
+      ? { maxOutputTokens: 700 }
+      : { temperature: 0.5, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
   };
 }
 
@@ -29,7 +31,7 @@ export function createProvider({ geminiKey, geminiModel }) {
         method: 'POST',
         signal,
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
-        body: JSON.stringify(toGeminiBody(messages)),
+        body: JSON.stringify(toGeminiBody(messages, geminiModel)),
       });
       if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 200)}`);
 

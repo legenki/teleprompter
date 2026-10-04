@@ -135,11 +135,13 @@ npm test                       # unit tests for segmentation / question detectio
 
 1. Open the call tab, click the extension icon on it (this grants tab-capture access) and press **Start**. The keyboard icon in the header opens a field for typing a question by hand (handy for testing the answers without audio).
 2. **Settings** (top right): paste a free Gemini API key (aistudio.google.com/apikey), your resume and the vacancy.
+   Answers use `gemini-3.5-flash-lite` by default (generous free limits; check yours in AI Studio → rate limits).
+   Gemini 3.x models cannot switch thinking off, so the request omits `thinkingBudget` and `temperature` for them.
 3. **Languages** are two switches under the header: *Interviewer* (EN / ES) and *Answers* (EN / ES / RU). The Russian
    translation line is always shown. Changing the interviewer language while listening stops it; press Start again.
    Spanish uses the multilingual Whisper `small` model (more accurate, slower on CPU) and English uses `base`.
 4. **Speech recognition → Gemini** is more accurate but sends the call audio to Google (on the free tier Google may use it to
-   improve its products). It waits for longer pauses to save quota and falls back to on-device Whisper automatically on
+   improve its products). It uses `gemini-2.5-flash-lite`, whose audio input is documented, and waits for longer pauses to save quota and falls back to on-device Whisper automatically on
    401/403/429. On-device stays the default. Whisper runs in a Web Worker, so the UI never freezes.
 5. Click an answer to copy it. The light or dark theme follows the system.
 

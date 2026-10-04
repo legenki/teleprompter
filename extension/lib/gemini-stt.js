@@ -63,5 +63,5 @@ export async function geminiTranscribe(samples, { key, model, hint, language }, 
   return parts.map((p) => p.text || '').join('').trim();
 }
 
-// Quota / auth problems will not fix themselves mid-interview: stop calling Gemini.
-export const isFatalGeminiError = (e) => [401, 403, 429].includes(e?.status);
+// Quota / auth / unknown-model problems will not fix themselves mid-interview: stop calling Gemini.
+export const isFatalGeminiError = (e) => [401, 403, 404, 429].includes(e?.status);
