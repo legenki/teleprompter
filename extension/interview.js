@@ -28,6 +28,7 @@ let stt = null;
 let provider = null;
 let providerSig = '';
 let listening = false;
+let listeningDetail = 'Listening';
 let history = [];
 let currentAbort = null;
 let chain = Promise.resolve();
@@ -351,7 +352,7 @@ function run(text, ui, answer, ctx) {
       ui.meta.textContent = `${ui.sttMs != null ? `STT ${(ui.sttMs / 1000).toFixed(1)}s · ` : ''}LLM ${((performance.now() - t0) / 1000).toFixed(1)}s`;
       ui.data.meta = ui.meta.textContent;
       publish(ui, true);
-      if (listening) setStatus('listening', 'Listening');
+      if (listening) setStatus('listening', listeningDetail);
     } catch (e) {
       ui.ru.classList.remove('pending');
       if (ac.signal.aborted) {
@@ -373,6 +374,7 @@ function run(text, ui, answer, ctx) {
 function onSttEvent(msg) {
   if (msg.type === 'status') {
     listening = msg.state === 'listening';
+    if (listening) listeningDetail = msg.detail; // e.g. "Listening on-device. Live: <reason>" must survive the next answer
     setStatus(msg.state, msg.detail);
     const on = listening || msg.state === 'loading';
     $('btn-start').textContent = on ? 'Stop' : 'Start';
