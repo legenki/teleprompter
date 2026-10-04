@@ -12,7 +12,7 @@ async function ensureOffscreen() {
   });
 }
 
-async function startCapture({ model, language, engine, gemini }) {
+async function startCapture({ model, language, engine, gemini, vocabulary }) {
   // activeTab is granted for the tab where the user clicked the toolbar icon.
   const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
   if (!tab) throw new Error('No active tab found');
@@ -23,7 +23,7 @@ async function startCapture({ model, language, engine, gemini }) {
     throw new Error('Cannot capture this tab. Click the extension icon while on the call tab, then press Start.');
   }
   await ensureOffscreen();
-  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, model, language, engine, gemini });
+  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, model, language, engine, gemini, vocabulary });
   return { tabTitle: tab.title };
 }
 

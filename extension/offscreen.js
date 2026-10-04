@@ -12,6 +12,7 @@ chrome.runtime.onMessage.addListener((msg) => {
       language: msg.language,
       engine: msg.engine,
       gemini: msg.gemini,
+      vocabulary: msg.vocabulary,
       playback: true, // capturing a tab mutes it, so play it back unchanged
       getStream: () => navigator.mediaDevices.getUserMedia({
         audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: msg.streamId } },

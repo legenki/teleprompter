@@ -143,7 +143,13 @@ npm test                       # unit tests for segmentation / question detectio
 4. **Speech recognition → Gemini** is more accurate but sends the call audio to Google (on the free tier Google may use it to
    improve its products). It uses `gemini-2.5-flash-lite`, whose audio input is documented, and waits for longer pauses to save quota and falls back to on-device Whisper automatically on
    401/403/429. On-device stays the default. Whisper runs in a Web Worker, so the UI never freezes.
-5. Click an answer to copy it. The light or dark theme follows the system.
+5. **Live** (the third speech option) streams the audio to `gemini-3.5-transcribe-live` and shows the words while the interviewer
+   is still speaking. It detects the language per phrase, biases recognition with terms taken from your vacancy and resume,
+   and reconnects every ~14 minutes (sessions are capped at 15). If it cannot connect or drops, the panel switches to on-device Whisper
+   and shows why in the status line (hover for the full text).
+   Its wire format is only partly documented, so the client tries several setup shapes and logs everything with a `[live]`
+   prefix: open the DevTools console (extension: right-click the panel → Inspect; web page: F12) and filter by `[live]`.
+6. Click an answer to copy it. The light or dark theme follows the system.
 
 Only tab audio is captured (the desktop Zoom/Teams apps are not). The API key is stored in `chrome.storage.local`. Whisper
 models are downloaded from huggingface.co on first use. Check the interviewer's / employer's rules on AI assistance first.

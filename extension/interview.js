@@ -3,6 +3,7 @@ import { GEMINI_STT_MODEL } from './lib/gemini.js';
 import { isQuestion } from './lib/question.js';
 import { whisperModelId, defaultSize } from './lib/stt-models.js';
 import { createPhoneLink } from './lib/phone-link.js';
+import { extractVocabulary } from './lib/live-transcribe.js';
 import { buildAnswerMessages, buildTranslateMessages, parseReply } from './lib/prompt.js';
 
 const KEY = 'copilot.settings';
@@ -87,7 +88,7 @@ function applySettingsToUi() {
 }
 
 function syncReveals() {
-  $('stt-note').classList.toggle('open', settings.sttEngine === 'gemini');
+  $('stt-note').classList.toggle('open', settings.sttEngine !== 'whisper');
   $('phone-fields').classList.toggle('open', settings.phoneEnabled === 'on');
 }
 
@@ -219,13 +220,14 @@ async function openAudioInput() {
 // ---------- engines ----------
 function sttConfig() {
   const engine = settings.sttEngine;
-  if (engine === 'gemini' && !settings.geminiKey) throw new Error('Add a Gemini API key in Settings to use Gemini speech recognition.');
+  if (engine !== 'whisper' && !settings.geminiKey) throw new Error('Add a Gemini API key in Settings to use Gemini speech recognition.');
   const lang = settings.interviewerLang;
   return {
     model: whisperModelId(defaultSize(lang), lang),
     language: lang,
     engine,
     gemini: { key: settings.geminiKey, model: GEMINI_STT_MODEL, hint: settings.job.slice(0, 600) },
+    vocabulary: engine === 'live' ? extractVocabulary(settings.job, settings.resume) : [],
   };
 }
 
@@ -244,6 +246,14 @@ function setStatus(state, text) {
   const s = $('status');
   s.className = `status ${state}`;
   s.textContent = text;
+  s.title = text; // the line is truncated; the tooltip keeps the full message
+}
+
+// ---------- live caption (interim text from Gemini Live) ----------
+function setCaption(text) {
+  const c = $('caption');
+  if (text) c.textContent = text;
+  c.classList.toggle('on', !!text);
 }
 
 // ---------- cards ----------
@@ -368,8 +378,11 @@ function onSttEvent(msg) {
     $('btn-start').textContent = on ? 'Stop' : 'Start';
     $('btn-start').classList.toggle('on', on);
     $('level').parentElement.classList.toggle('on', listening);
-    if (!listening) $('level').style.transform = 'scaleX(0)';
+    if (!listening) { $('level').style.transform = 'scaleX(0)'; if (!on) setCaption(''); }
+  } else if (msg.type === 'interim') {
+    setCaption(msg.text);
   } else if (msg.type === 'text') {
+    setCaption('');
     handleLine(msg.text, msg.sttMs);
   } else if (msg.type === 'level') {
     $('level').style.transform = `scaleX(${msg.level.toFixed(3)})`;
